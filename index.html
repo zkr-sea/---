@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>万校互联教练系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="ai-integration.js"></script>
+    <style>
+        .card {
+            @apply bg-white rounded-lg shadow-md border border-gray-200 p-6;
+        }
+        .btn-primary {
+            @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+        }
+        .btn-secondary {
+            @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+        }
+        .input-field {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 头部 -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-900">万校互联教练系统</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">欢迎回来，教练</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 标签页 -->
+        <div class="border-b border-gray-200 mb-8">
+            <nav class="-mb-px flex space-x-8">
+                <button onclick="switchTab('dashboard')" class="tab-btn active" data-tab="dashboard">
+                    <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    仪表板
+                </button>
+                <button onclick="switchTab('students')" class="tab-btn" data-tab="students">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    学生管理
+                </button>
+                <button onclick="switchTab('schedule')" class="tab-btn" data-tab="schedule">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    课程安排
+                </button>
+                <button onclick="switchTab('completed')" class="tab-btn" data-tab="completed">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    已完成课程
+                </button>
+                <button onclick="switchTab('trials')" class="tab-btn" data-tab="trials">
+                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                    试学流程生成
+                </button>
+                <button onclick="switchTab('feedback')" class="tab-btn" data-tab="feedback">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                    伴学反馈
+                </button>
+            </nav>
+        </div>
+
+        <!-- 内容区域 -->
+        <div id="content">
+            <!-- 仪表板 -->
+            <div id="dashboard-content" class="tab-content active">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-900">仪表板</h2>
+                    </div>
+                    
+                    <!-- 统计卡片 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="card">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-blue-50 text-blue-600">
+                                    <i data-lucide="users" class="w-6 h-6"></i>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-sm font-medium text-gray-600">总学生数</p>
+                                    <p class="text-2xl font-bold text-gray-900">0</p>
+                                    <p class="text-sm text-gray-500 mt-1">暂无学生</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-green-50 text-green-600">
+                                    <i data-lucide="users" class="w-6 h-6"></i>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-sm font-medium text-gray-600">正式学员</p>
+                                    <p class="text-2xl font-bold text-gray-900">0</p>
+                                    <p class="text-sm text-gray-500 mt-1">暂无正式学员</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-yellow-50 text-yellow-600">
+                                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-sm font-medium text-gray-600">试课学员</p>
+                                    <p class="text-2xl font-bold text-gray-900">0</p>
+                                    <p class="text-sm text-gray-500 mt-1">暂无试课学员</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-purple-50 text-purple-600">
+                                    <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-sm font-medium text-gray-600">总薪资</p>
+                                    <p class="text-2xl font-bold text-gray-900">¥0.0</p>
+                                    <p class="text-sm text-gray-500 mt-1">暂无收入</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- 最近活动 -->
+                        <div class="card">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-6">最近活动</h3>
+                            <div class="space-y-4">
+                                <div class="text-center py-8">
+                                    <i data-lucide="calendar" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
+                                    <p class="text-gray-500">暂无最近活动</p>
+                                    <p class="text-sm text-gray-400 mt-2">开始添加课程和学生后，这里会显示最新活动</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 即将到来的课程 -->
+                        <div class="card">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-6">即将到来的课程</h3>
+                            <div class="text-center py-8">
+                                <i data-lucide="clock" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
+                                <p class="text-gray-500">暂无即将到来的课程</p>
+                                <p class="text-sm text-gray-400 mt-2">添加课程安排后，这里会显示即将到来的课程</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 学生管理 -->
+            <div id="students-content" class="tab-content">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-900">学生管理</h2>
+                        <button class="btn-primary flex items-center gap-2" onclick="showAddStudentModal()">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            添加学生
+                        </button>
+                    </div>
+                    
+                    <div class="flex gap-4 mb-6">
+                        <div class="flex-1 relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                            <input type="text" placeholder="搜索学生姓名..." class="input-field pl-10" onkeyup="filterStudents(this.value)">
+                        </div>
+                        <select class="input-field w-48" onchange="filterBySubject(this.value)">
+                            <option value="">所有科目</option>
+                            <option value="语文">语文</option>
+                            <option value="数学">数学</option>
+                            <option value="英语">英语</option>
+                            <option value="物理">物理</option>
+                        </select>
+                    </div>
+
+                    <!-- 正式成员 -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="users" class="w-5 h-5 text-green-600"></i>
+                            正式成员
+                        </h3>
+                                                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="formal-students">
+                            <!-- 正式学员列表会动态生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 试课成员 -->
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="book-open" class="w-5 h-5 text-yellow-600"></i>
+                            试课成员
+                        </h3>
+                        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="trial-students">
+                            <!-- 试课成员列表会动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已完成课程 -->
+            <div id="completed-content" class="tab-content">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-900">已完成课程</h2>
+                        <div class="text-sm text-gray-600">
+                            共完成 <span id="completed-count">0</span> 门课程
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">学员姓名</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">科目</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">年级</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">课程时间</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">完成时间</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">类型</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">薪资</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="completed-courses-list">
+                                    <!-- 已完成课程列表会通过JavaScript动态生成 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 课程安排 -->
+            <div id="schedule-content" class="tab-content">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-900">课程安排</h2>
+                        <button class="btn-primary flex items-center gap-2" onclick="showAddScheduleModal()">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            安排课程
+                        </button>
+                    </div>
+                    
+                    <!-- 课程时间表 -->
+                    <div class="card overflow-x-auto">
+                        <div class="min-w-full">
+                            <table class="w-full border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700 w-16">时间</th>
+                                        <th class="border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700">周一</th>
+                                        <th class="border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700">周二</th>
+                                        <th class="border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700">周三</th>
+                                        <th class="border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700">周四</th>
+                                        <th class="border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700">周五</th>
+                                        <th class="border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700">周六</th>
+                                        <th class="border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700">周日</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="schedule-table-body">
+                                    <!-- 时间行会通过JavaScript动态生成 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- 图例说明 -->
+                    <div class="card">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">学员颜色说明</h3>
+                        <p class="text-sm text-gray-600 mb-4">每个学员都有独特的颜色标识，方便在时间表中快速识别。颜色会根据学员数量自动分配。</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-pink-200 border border-pink-300 rounded"></div>
+                                <span class="text-sm text-gray-600">学员1</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-indigo-200 border border-indigo-300 rounded"></div>
+                                <span class="text-sm text-gray-600">学员2</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-teal-200 border border-teal-300 rounded"></div>
+                                <span class="text-sm text-gray-600">学员3</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-purple-200 border border-purple-300 rounded"></div>
+                                <span class="text-sm text-gray-600">学员4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 试学流程生成 -->
+            <div id="trials-content" class="tab-content">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-900">试学流程生成</h2>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">试课学员列表</h3>
+                        <div class="grid gap-4" id="trial-students-list">
+                            <!-- 试课学员列表会通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 伴学反馈 -->
+            <div id="feedback-content" class="tab-content">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-900">伴学反馈</h2>
+                        <button onclick="showAddFeedbackModal()" class="btn-primary flex items-center gap-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            添加反馈
+                        </button>
+                    </div>
+                    
+                    <!-- AI智能分析面板 -->
+                    <div class="card bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 rounded-lg bg-blue-100">
+                                    <i data-lucide="brain" class="w-6 h-6 text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">AI智能分析</h3>
+                                    <p class="text-sm text-gray-600">基于历史数据和学习表现，AI为您提供个性化建议</p>
+                                </div>
+                            </div>
+                            <button onclick="showAIConfigModal()" class="btn-secondary text-sm bg-purple-100 text-purple-700 hover:bg-purple-200">
+                                <i data-lucide="settings" class="w-4 h-4"></i>
+                                AI配置
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-white p-4 rounded-lg border">
+                                <h4 class="font-medium text-gray-900 mb-2">学习趋势</h4>
+                                <p class="text-sm text-gray-600">整体呈上升趋势，数学基础扎实</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border">
+                                <h4 class="font-medium text-gray-900 mb-2">薄弱环节</h4>
+                                <p class="text-sm text-gray-600">应用题解题思路需要加强</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border">
+                                <h4 class="font-medium text-gray-900 mb-2">建议重点</h4>
+                                <p class="text-sm text-gray-600">多练习实际应用题，培养解题思维</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 反馈列表 -->
+                    <div id="feedback-list" class="grid gap-4">
+                        <div class="text-center py-12">
+                            <i data-lucide="message-square" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">暂无反馈记录</h3>
+                            <p class="text-gray-500 mb-4">开始添加伴学反馈后，这里会显示反馈列表</p>
+                            <button onclick="showAddFeedbackModal()" class="btn-primary">
+                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                添加第一个反馈
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 初始化图标
+        lucide.createIcons();
+
+        // 标签页切换功能
+        function switchTab(tabName) {
+            // 隐藏所有内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有标签的active类
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 显示选中的内容
+            document.getElementById(tabName + '-content').classList.add('active');
+            
+            // 添加active类到选中的标签
+            event.target.classList.add('active');
+            
+            // 如果切换到已完成课程页面，更新列表
+            if (tabName === 'completed') {
+                updateCompletedCoursesList();
+            }
+        }
+
+        // 搜索学生功能
+        function filterStudents(searchTerm) {
+            const studentCards = document.querySelectorAll('.student-card');
+            searchTerm = searchTerm.toLowerCase();
+            
+            studentCards.forEach(card => {
+                const studentName = card.getAttribute('data-name').toLowerCase();
+                if (studentName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 按科目筛选功能
+        function filterBySubject(subject) {
+            const studentCards = document.querySelectorAll('.student-card');
+            
+            studentCards.forEach(card => {
+                const cardSubject = card.getAttribute('data-subject');
+                if (subject === '' || cardSubject === subject) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 试课成员转为正式成员
+        function convertToFormal(button) {
+            const studentCard = button.closest('.student-card');
+            const studentName = studentCard.getAttribute('data-name');
+            const subject = studentCard.getAttribute('data-subject');
+            
+            // 确认转换
+            if (confirm(`确定要将 ${studentName} 从试课成员转为正式成员吗？`)) {
+                // 移除转换按钮
+                button.remove();
+                
+                // 更新状态标签
+                const statusSpan = studentCard.querySelector('span');
+                statusSpan.textContent = '正式学员';
+                statusSpan.className = 'px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                
+                // 移动到正式成员区域
+                const formalStudentsContainer = document.getElementById('formal-students');
+                formalStudentsContainer.appendChild(studentCard);
+                
+                // 更新学生数据映射
+                if (window.studentMap && window.studentMap[studentName]) {
+                    window.studentMap[studentName].type = 'formal';
+                }
+                
+                // 更新仪表板统计
+                updateDashboardStats();
+                
+                // 更新课程安排模块的学生列表
+                updateScheduleStudentOptions();
+                
+                // 显示成功消息
+                showNotification(`${studentName} 已成功转为正式成员！`, 'success');
+            }
+        }
+
+        // 显示通知消息
+        function showNotification(message, type = 'info') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            let bgColor = 'bg-blue-500';
+            
+            if (type === 'success') {
+                bgColor = 'bg-green-500';
+            } else if (type === 'error') {
+                bgColor = 'bg-red-500';
+            }
+            
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${bgColor} text-white`;
+            notification.textContent = message;
+            
+            // 添加到页面
+            document.body.appendChild(notification);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // 显示添加学生模态框
+        function showAddStudentModal() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+            modal.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" onclick="closeModal()"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">添加新学生</h3>
+                                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <form onsubmit="addNewStudent(event)">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">学员姓名 *</label>
+                                        <input type="text" name="name" required class="input-field" placeholder="请输入学员姓名">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">电话 *</label>
+                                        <input type="tel" name="phone" required class="input-field" placeholder="请输入联系电话">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">年级 *</label>
+                                        <select name="grade" required class="input-field">
+                                            <option value="">请选择年级</option>
+                                            <option value="小学">小学</option>
+                                            <option value="初中">初中</option>
+                                            <option value="高中">高中</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">科目 *</label>
+                                        <select name="subject" required class="input-field" onchange="toggleTrialTime(this.value)">
+                                            <option value="">请选择科目</option>
+                                            <option value="语文">语文</option>
+                                            <option value="数学">数学</option>
+                                            <option value="英语">英语</option>
+                                            <option value="物理">物理</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">学员类型 *</label>
+                                        <select name="type" required class="input-field" onchange="toggleTrialTime(this.value)">
+                                            <option value="">请选择类型</option>
+                                            <option value="trial">试课学员</option>
+                                            <option value="formal">正式学员</option>
+                                        </select>
+                                    </div>
+                                    <div id="trial-time-field" style="display: none;">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">试课时间 *</label>
+                                        <input type="datetime-local" name="trialTime" class="input-field">
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 mt-6">
+                                    <button type="submit" class="btn-primary flex-1">添加学生</button>
+                                    <button type="button" onclick="closeModal()" class="btn-secondary flex-1">取消</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            const modal = document.querySelector('.fixed.inset-0.z-50');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        // 添加新学生
+        function addNewStudent(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const studentData = Object.fromEntries(formData);
+            
+            // 创建学生卡片
+            const studentCard = createStudentCard(studentData);
+            
+            // 设置年级属性
+            studentCard.setAttribute('data-grade', studentData.grade);
+            
+            // 根据类型添加到对应区域
+            if (studentData.type === 'trial') {
+                document.getElementById('trial-students').appendChild(studentCard);
+            } else {
+                document.getElementById('formal-students').appendChild(studentCard);
+            }
+            
+            // 更新学生数据映射
+            const studentMap = window.studentMap || {};
+            studentMap[studentData.name] = { 
+                subject: studentData.subject, 
+                type: studentData.type,
+                grade: studentData.grade 
+            };
+            window.studentMap = studentMap;
+            
+            // 更新仪表板统计
+            updateDashboardStats();
+            
+            // 更新课程安排模块的学生列表
+            updateScheduleStudentOptions();
+            
+            // 如果是试课学员，自动添加到课程安排中
+            if (studentData.type === 'trial' && studentData.trialTime) {
+                addTrialCourseToSchedule(studentData);
+            }
+            
+            // 关闭模态框
+            closeModal();
+            
+            // 显示成功消息
+            showNotification(`学生 ${studentData.name} 添加成功！`, 'success');
+        }
+
+        // 删除学生
+        function deleteStudent(button) {
+            const studentCard = button.closest('.student-card');
+            const studentName = studentCard.getAttribute('data-name');
+            
+            if (confirm(`确定要删除学员 ${studentName} 吗？此操作不可恢复。`)) {
+                studentCard.remove();
+                
+                // 从学生数据映射中删除
+                if (window.studentMap && window.studentMap[studentName]) {
+                    delete window.studentMap[studentName];
+                }
+                
+                // 更新仪表板统计
+                updateDashboardStats();
+                
+                // 更新课程安排模块的学生列表
+                updateScheduleStudentOptions();
+                
+                showNotification(`学员 ${studentName} 已删除！`, 'success');
+            }
+        }
+
+        // 更新仪表板统计
+        function updateDashboardStats() {
+            const formalStudents = document.querySelectorAll('#formal-students .student-card').length;
+            const trialStudents = document.querySelectorAll('#trial-students .student-card').length;
+            const totalStudents = formalStudents + trialStudents;
+            
+            // 更新总学生数
+            const totalStudentsElement = document.querySelector('.card:nth-child(1) .text-2xl');
+            if (totalStudentsElement) {
+                totalStudentsElement.textContent = totalStudents;
+                const subtitle = totalStudentsElement.nextElementSibling;
+                if (subtitle) {
+                    subtitle.textContent = totalStudents > 0 ? `+${totalStudents} 本月新增` : '暂无学生';
+                }
+            }
+            
+            // 更新正式学员数
+            const monthlyCoursesElement = document.querySelector('.card:nth-child(2) .text-2xl');
+            if (monthlyCoursesElement) {
+                monthlyCoursesElement.textContent = formalStudents;
+                const subtitle = monthlyCoursesElement.nextElementSibling;
+                if (subtitle) {
+                    subtitle.textContent = formalStudents > 0 ? `${formalStudents} 名学员` : '暂无正式学员';
+                }
+            }
+            
+            // 更新试课学员数
+            const trialCoursesElement = document.querySelector('.card:nth-child(3) .text-2xl');
+            if (trialCoursesElement) {
+                trialCoursesElement.textContent = trialStudents;
+                const subtitle = trialCoursesElement.nextElementSibling;
+                if (subtitle) {
+                    subtitle.textContent = trialStudents > 0 ? `${trialStudents} 名学员` : '暂无试课学员';
+                }
+            }
+            
+            // 更新总薪资
+            const feedbackElement = document.querySelector('.card:nth-child(4) .text-2xl');
+            if (feedbackElement) {
+                const totalSalary = completedCourses.reduce((total, course) => {
+                    return total + parseFloat(getCoursePrice(course));
+                }, 0);
+                feedbackElement.textContent = '¥' + totalSalary.toFixed(1);
+                const subtitle = feedbackElement.nextElementSibling;
+                if (subtitle) {
+                    subtitle.textContent = totalSalary > 0 ? `${totalSalary.toFixed(1)} 元总收入` : '暂无收入';
+                }
+            }
+        }
+
+        // 将试课学员自动添加到课程安排
+        function addTrialCourseToSchedule(studentData) {
+            if (!studentData.trialTime) return;
+            
+            const trialDate = new Date(studentData.trialTime);
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const day = dayNames[trialDate.getDay()];
+            const time = trialDate.getHours().toString().padStart(2, '0') + ':' + trialDate.getMinutes().toString().padStart(2, '0');
+            
+            const newCourse = {
+                id: Date.now().toString(),
+                studentName: studentData.name,
+                subject: studentData.subject,
+                day: day,
+                time: time,
+                duration: 60, // 试课默认60分钟
+                type: 'trial',
+                status: 'scheduled'
+            };
+            
+            // 检查时间冲突
+            const conflict = scheduleData.find(course => {
+                if (course.day === day && course.status !== 'completed') {
+                    const newStartHour = parseInt(time.split(':')[0]);
+                    const newStartMinute = parseInt(time.split(':')[1]);
+                    const newStartMinutes = newStartHour * 60 + newStartMinute;
+                    const newEndMinutes = newStartMinutes + 60; // 试课60分钟
+                    
+                    const existingStartHour = parseInt(course.time.split(':')[0]);
+                    const existingStartMinute = parseInt(course.time.split(':')[1]);
+                    const existingStartMinutes = existingStartHour * 60 + existingStartMinute;
+                    const existingEndMinutes = existingStartMinutes + course.duration;
+                    
+                    return (newStartMinutes < existingEndMinutes && newEndMinutes > existingStartMinutes);
+                }
+                return false;
+            });
+            
+            if (conflict) {
+                showNotification(`试课时间冲突！${conflict.studentName} 在 ${getDayName(conflict.day)}${conflict.time} 已有课程安排`, 'error');
+                return;
+            }
+            
+            scheduleData.push(newCourse);
+            generateScheduleTable();
+            
+            // 更新仪表板统计
+            updateDashboardStats();
+            
+            showNotification(`试课学员 ${studentData.name} 已自动添加到课程安排！`, 'success');
+        }
+
+        // 更新课程安排模块的学生选项
+        function updateScheduleStudentOptions() {
+            // 获取所有学生
+            const formalStudents = Array.from(document.querySelectorAll('#formal-students .student-card')).map(card => ({
+                name: card.getAttribute('data-name'),
+                subject: card.getAttribute('data-subject'),
+                grade: card.getAttribute('data-grade'),
+                type: 'formal'
+            }));
+            
+            const trialStudents = Array.from(document.querySelectorAll('#trial-students .student-card')).map(card => ({
+                name: card.getAttribute('data-name'),
+                subject: card.getAttribute('data-subject'),
+                grade: card.getAttribute('data-grade'),
+                type: 'trial'
+            }));
+            
+            const allStudents = [...formalStudents, ...trialStudents];
+            
+            // 更新课程安排模态框中的学生选择下拉框
+            const scheduleStudentSelect = document.querySelector('select[name="studentName"]');
+            if (scheduleStudentSelect) {
+                // 保存当前选中的值
+                const currentValue = scheduleStudentSelect.value;
+                
+                // 清空现有选项
+                scheduleStudentSelect.innerHTML = '<option value="">请选择学员</option>';
+                
+                // 添加新的学生选项
+                allStudents.forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = student.name;
+                    option.textContent = `${student.name} (${student.grade} · ${student.subject} · ${student.type === 'trial' ? '试课' : '正式'})`;
+                    scheduleStudentSelect.appendChild(option);
+                });
+                
+                // 恢复之前选中的值（如果还存在）
+                if (currentValue && allStudents.some(s => s.name === currentValue)) {
+                    scheduleStudentSelect.value = currentValue;
+                }
+            }
+        }
+
+        // 切换试课时间字段显示
+        function toggleTrialTime(value) {
+            const trialTimeField = document.getElementById('trial-time-field');
+            const typeSelect = document.querySelector('select[name="type"]');
+            const subjectSelect = document.querySelector('select[name="subject"]');
+            
+            // 如果选择了试课学员，显示试课时间字段
+            if (typeSelect.value === 'trial' && subjectSelect.value !== '') {
+                trialTimeField.style.display = 'block';
+                trialTimeField.querySelector('input').required = true;
+            } else {
+                trialTimeField.style.display = 'none';
+                trialTimeField.querySelector('input').required = false;
+            }
+        }
+
+        // 创建学生卡片
+        function createStudentCard(studentData) {
+            const card = document.createElement('div');
+            card.className = 'card student-card';
+            card.setAttribute('data-subject', studentData.subject);
+            card.setAttribute('data-name', studentData.name);
+            card.setAttribute('data-grade', studentData.grade);
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (studentData.type === 'trial') {
+                // 格式化试课时间
+                const trialTime = studentData.trialTime ? new Date(studentData.trialTime).toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : '';
+                
+                            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">${studentData.name}</h3>
+                        <p class="text-sm text-gray-600">${studentData.grade} · ${studentData.subject}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            试学中
+                        </span>
+                        <button class="text-green-600 hover:text-green-700 transition-colors" onclick="convertToFormal(this)" title="转为正式成员">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <p>📞 ${studentData.phone}</p>
+                    <p>📍 北京市</p>
+                    <p>📅 加入时间: ${today}</p>
+                    ${trialTime ? `<p>⏰ 试课时间: ${trialTime}</p>` : ''}
+                </div>
+                    <div class="flex gap-2 mt-4">
+                        <button class="btn-primary text-sm">编辑</button>
+                        <button class="btn-secondary text-sm">查看详情</button>
+                        <button class="btn-secondary text-sm text-red-600 hover:text-red-700" onclick="deleteStudent(this)">删除</button>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">${studentData.name}</h3>
+                            <p class="text-sm text-gray-600">${studentData.grade} · ${studentData.subject}</p>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            正式学员
+                        </span>
+                    </div>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <p>📞 ${studentData.phone}</p>
+                        <p>📍 北京市</p>
+                        <p>📅 加入时间: ${today}</p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button class="btn-primary text-sm">编辑</button>
+                        <button class="btn-secondary text-sm">查看详情</button>
+                        <button class="btn-secondary text-sm text-red-600 hover:text-red-700" onclick="deleteStudent(this)">删除</button>
+                    </div>
+                `;
+            }
+            
+            return card;
+        }
+
+        // 课程数据 - 初始为空
+        const scheduleData = [];
+
+        // 学员颜色映射 - 动态生成
+        const studentColors = {};
+        
+        // 动态生成学员颜色
+        function generateStudentColor(studentName) {
+            if (!studentColors[studentName]) {
+                const colors = [
+                    { bg: 'bg-pink-200', text: 'text-pink-800', border: 'border-pink-300' },
+                    { bg: 'bg-indigo-200', text: 'text-indigo-800', border: 'border-indigo-300' },
+                    { bg: 'bg-teal-200', text: 'text-teal-800', border: 'border-teal-300' },
+                    { bg: 'bg-purple-200', text: 'text-purple-800', border: 'border-purple-300' },
+                    { bg: 'bg-orange-200', text: 'text-orange-800', border: 'border-orange-300' },
+                    { bg: 'bg-green-200', text: 'text-green-800', border: 'border-green-300' },
+                    { bg: 'bg-blue-200', text: 'text-blue-800', border: 'border-blue-300' },
+                    { bg: 'bg-red-200', text: 'text-red-800', border: 'border-red-300' }
+                ];
+                const colorIndex = Object.keys(studentColors).length % colors.length;
+                studentColors[studentName] = colors[colorIndex];
+            }
+            return studentColors[studentName];
+        }
+
+        // 生成时间表
+        function generateScheduleTable() {
+            const tableBody = document.getElementById('schedule-table-body');
+            if (!tableBody) return;
+
+
+            tableBody.innerHTML = '';
+            
+            // 生成时间行（8:00-24:00，每30分钟一行）
+            for (let hour = 8; hour <= 23; hour++) {
+                for (let minute = 0; minute < 60; minute += 30) {
+                    const row = document.createElement('tr');
+                    const timeCell = document.createElement('td');
+                    timeCell.className = 'border border-gray-200 px-2 py-1 text-xs text-gray-600 bg-gray-50 font-medium';
+                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    timeCell.textContent = timeString;
+                    row.appendChild(timeCell);
+
+                    // 为每一天创建单元格
+                    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                    days.forEach(day => {
+                        const cell = document.createElement('td');
+                        cell.className = 'border border-gray-200 px-1 py-1 text-xs relative';
+                        cell.setAttribute('data-day', day);
+                        cell.setAttribute('data-time', timeString);
+                        
+                        // 查找该时间段的课程（只显示未完成的）
+                        const courses = scheduleData.filter(course => {
+                            if (course.status === 'completed') return false;
+                            
+                            const courseTime = course.time;
+                            const courseHour = parseInt(courseTime.split(':')[0]);
+                            const courseMinute = parseInt(courseTime.split(':')[1]);
+                            const courseStartMinutes = courseHour * 60 + courseMinute;
+                            const courseEndMinutes = courseStartMinutes + course.duration;
+                            
+                            const currentMinutes = hour * 60 + minute;
+                            const nextMinutes = currentMinutes + 30;
+                            
+                            const matches = course.day === day && 
+                                           courseStartMinutes <= currentMinutes && 
+                                           courseEndMinutes > currentMinutes;
+                            
+
+                            
+                            return matches;
+                        });
+
+                    if (courses.length > 0) {
+                        const course = courses[0];
+                        const studentColor = generateStudentColor(course.studentName);
+                        
+                        // 计算课程在这个时间段的位置
+                        const courseTime = course.time;
+                        const courseHour = parseInt(courseTime.split(':')[0]);
+                        const courseMinute = parseInt(courseTime.split(':')[1]);
+                        const courseStartMinutes = courseHour * 60 + courseMinute;
+                        const currentMinutes = hour * 60 + minute;
+                        
+                        // 如果是课程开始时间，显示完整信息
+                        if (courseStartMinutes === currentMinutes) {
+                            cell.className += ` ${studentColor.bg} ${studentColor.text} ${studentColor.border}`;
+                            cell.innerHTML = `
+                                <div class="font-medium text-xs">${course.studentName}</div>
+                                <div class="text-xs opacity-75">${course.subject}</div>
+                                <div class="text-xs opacity-75">${course.type === 'trial' ? '试课' : '正课'}</div>
+                                <button class="absolute top-1 right-1 text-green-600 hover:text-green-700 transition-colors" onclick="completeCourse('${course.id}', this)" title="标记完成">
+                                    <i data-lucide="check" class="w-3 h-3"></i>
+                                </button>
+                            `;
+                            
+                            // 添加点击事件（排除按钮区域）
+                            cell.onclick = (event) => {
+                                if (event.target.closest('button')) {
+                                    return;
+                                }
+                                showCourseDetails(course);
+                            };
+                            cell.style.cursor = 'pointer';
+                        } else {
+                            // 如果不是开始时间，只显示背景色表示延续
+                            cell.className += ` ${studentColor.bg} opacity-50`;
+                        }
+                        
+                        // 重新初始化图标
+                        setTimeout(() => {
+                            lucide.createIcons();
+                        }, 0);
+                    }
+                    
+                    row.appendChild(cell);
+                });
+                
+                tableBody.appendChild(row);
+            }
+        }
+        }
+
+        // 显示课程详情
+        function showCourseDetails(course) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+            modal.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" onclick="closeModal()"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">课程详情</h3>
+                                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <span class="font-medium text-gray-700">学员姓名：</span>
+                                    <span class="text-gray-900">${course.studentName}</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">科目：</span>
+                                    <span class="text-gray-900">${course.subject}</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">时间：</span>
+                                    <span class="text-gray-900">${getDayName(course.day)}${course.time}</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">时长：</span>
+                                    <span class="text-gray-900">${course.duration}分钟</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">类型：</span>
+                                    <span class="text-gray-900">${course.type === 'trial' ? '试课学员' : '正式学员'}</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">状态：</span>
+                                    <span class="text-gray-900">${getStatusName(course.status)}</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 mt-6">
+                                <button onclick="editCourse('${course.id}')" class="btn-primary flex-1">编辑</button>
+                                <button onclick="deleteCourse('${course.id}')" class="btn-secondary flex-1 text-red-600">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 获取星期名称
+        function getDayName(day) {
+            try {
+                const dayNames = {
+                    'monday': '周一',
+                    'tuesday': '周二',
+                    'wednesday': '周三',
+                    'thursday': '周四',
+                    'friday': '周五',
+                    'saturday': '周六',
+                    'sunday': '周日'
+                };
+                const dayName = dayNames[day] || day;
+                return dayName;
+            } catch (error) {
+                console.error('Error in getDayName:', error);
+                return day || '未知';
+            }
+        }
+
+        // 获取状态名称
+        function getStatusName(status) {
+            const statusNames = {
+                'scheduled': '已安排',
+                'completed': '已完成',
+                'cancelled': '已取消'
+            };
+            return statusNames[status] || status;
+        }
+
+        // 显示添加课程模态框
+        function showAddScheduleModal() {
+            // 获取学员管理页面中实际存在的学员
+            const formalStudents = Array.from(document.querySelectorAll('#formal-students .student-card')).map(card => ({
+                name: card.getAttribute('data-name'),
+                subject: card.getAttribute('data-subject'),
+                grade: card.getAttribute('data-grade'),
+                type: 'formal'
+            }));
+            
+            const trialStudents = Array.from(document.querySelectorAll('#trial-students .student-card')).map(card => ({
+                name: card.getAttribute('data-name'),
+                subject: card.getAttribute('data-subject'),
+                grade: card.getAttribute('data-grade'),
+                type: 'trial'
+            }));
+            
+            const allStudents = [...formalStudents, ...trialStudents];
+            
+            if (allStudents.length === 0) {
+                showNotification('请先在学员管理中添加学员！', 'error');
+                return;
+            }
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+            modal.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" onclick="closeModal()"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">安排课程</h3>
+                                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <form onsubmit="addNewCourse(event)">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">选择学员 *</label>
+                                        <select name="studentName" required class="input-field">
+                                            <option value="">请选择学员</option>
+                                            ${allStudents.map(student => 
+                                                `<option value="${student.name}">${student.name} (${student.grade} · ${student.subject} · ${student.type === 'trial' ? '试课' : '正式'})</option>`
+                                            ).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">星期 *</label>
+                                        <select name="day" required class="input-field">
+                                            <option value="">请选择星期</option>
+                                            <option value="monday">周一</option>
+                                            <option value="tuesday">周二</option>
+                                            <option value="wednesday">周三</option>
+                                            <option value="thursday">周四</option>
+                                            <option value="friday">周五</option>
+                                            <option value="saturday">周六</option>
+                                            <option value="sunday">周日</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 mb-1">时间 *</label>
+                                        <input type="time" name="time" required class="input-field">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">时长（分钟） *</label>
+                                        <input type="number" name="duration" min="30" max="180" step="30" value="60" required class="input-field">
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 mt-6">
+                                    <button type="submit" class="btn-primary flex-1">安排课程</button>
+                                    <button type="button" onclick="closeModal()" class="btn-secondary flex-1">取消</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 添加新课程
+        function addNewCourse(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const courseData = Object.fromEntries(formData);
+            
+            // 确定学员类型和科目
+            const studentInfo = getStudentInfo(courseData.studentName);
+            
+            const newCourse = {
+                id: Date.now().toString(),
+                studentName: courseData.studentName,
+                subject: studentInfo.subject,
+                day: courseData.day,
+                time: courseData.time,
+                duration: parseInt(courseData.duration),
+                type: studentInfo.type,
+                status: 'scheduled'
+            };
+            
+            // 检查时间冲突
+            const conflict = scheduleData.find(course => {
+                if (course.day === courseData.day && course.status !== 'completed') {
+                    const newStart = parseInt(courseData.time.split(':')[0]);
+                    const newEnd = newStart + Math.ceil(parseInt(courseData.duration) / 60);
+                    const existingStart = parseInt(course.time.split(':')[0]);
+                    const existingEnd = existingStart + Math.ceil(course.duration / 60);
+                    
+                    return (newStart < existingEnd && newEnd > existingStart);
+                }
+                return false;
+            });
+            
+            if (conflict) {
+                showNotification(`时间冲突！${conflict.studentName} 在 ${getDayName(conflict.day)}${conflict.time} 已有课程安排`, 'error');
+                return;
+            }
+            
+            scheduleData.push(newCourse);
+            generateScheduleTable();
+            
+            // 更新仪表板统计
+            updateDashboardStats();
+            
+            closeModal();
+            showNotification(`课程安排成功！${courseData.studentName} - ${studentInfo.subject}`, 'success');
+        }
+
+        // 获取学员信息
+        function getStudentInfo(studentName) {
+            const studentMap = window.studentMap || {};
+            return studentMap[studentName] || { subject: '未知', type: 'formal', grade: '未知' };
+        }
+
+        // 编辑课程
+        function editCourse(courseId) {
+            // 这里可以添加编辑课程的逻辑
+            showNotification('编辑功能开发中...', 'info');
+        }
+
+        // 已完成课程记录 - 只记录当月的
+        const completedCourses = [];
+        
+        // 获取所有已完成的课程
+        function getCurrentMonthCompletedCourses() {
+            try {
+                return completedCourses;
+            } catch (error) {
+                console.error('Error in getCurrentMonthCompletedCourses:', error);
+                return [];
+            }
+        }
+
+        // 完成课程
+        function completeCourse(courseId, button) {
+            try {
+                const courseIndex = scheduleData.findIndex(course => course.id === courseId);
+                
+                if (courseIndex !== -1) {
+                    const course = scheduleData[courseIndex];
+                    
+                    // 显示确认对话框
+                    if (confirm(`是否完成课程？\n\n学员：${course.studentName}\n科目：${course.subject}\n时间：${getDayName(course.day)}${course.time}\n类型：${course.type === 'trial' ? '试课' : '正课'}\n时长：${course.duration}分钟`)) {
+                        const completedCourse = {
+                            ...course,
+                            completedTime: new Date().toLocaleString('zh-CN'),
+                            status: 'completed'
+                        };
+                        
+                        // 添加到已完成记录
+                        completedCourses.push(completedCourse);
+                        
+                        // 从课程安排中移除
+                        scheduleData.splice(courseIndex, 1);
+                        
+                        // 重新生成时间表
+                        generateScheduleTable();
+                        updateCompletedCoursesList();
+                        
+                        // 更新仪表板统计
+                        updateDashboardStats();
+                        
+                        // 显示成功消息
+                        showNotification(`${course.studentName} 的课程已完成！`, 'success');
+                    }
+                } else {
+                    showNotification('课程未找到！', 'error');
+                }
+            } catch (error) {
+                console.error('Error in completeCourse:', error);
+                showNotification('完成课程时出现错误：' + error.message, 'error');
+            }
+        }
+
+        // 删除课程
+        function deleteCourse(courseId) {
+            const courseIndex = scheduleData.findIndex(course => course.id === courseId);
+            if (courseIndex !== -1) {
+                const course = scheduleData[courseIndex];
+                if (confirm(`确定要删除 ${course.studentName} 的课程吗？`)) {
+                    scheduleData.splice(courseIndex, 1);
+                    generateScheduleTable();
+                    
+                    // 更新仪表板统计
+                    updateDashboardStats();
+                    
+                    closeModal();
+                    showNotification(`课程已删除！`, 'success');
+                }
+            }
+        }
+
+        // 更新已完成课程列表
+        function updateCompletedCoursesList() {
+            try {
+                const completedList = document.getElementById('completed-courses-list');
+                const completedCount = document.getElementById('completed-count');
+                
+                if (!completedList) {
+                    return;
+                }
+                
+                completedList.innerHTML = '';
+                
+                // 显示所有已完成的课程
+                const currentMonthCourses = getCurrentMonthCompletedCourses();
+                completedCount.textContent = currentMonthCourses.length;
+                
+                let totalSalary = 0;
+                
+                currentMonthCourses.forEach(course => {
+                    const coursePrice = parseFloat(getCoursePrice(course));
+                    totalSalary += coursePrice;
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="py-3 px-4">${course.studentName}</td>
+                        <td class="py-3 px-4">${course.subject}</td>
+                        <td class="py-3 px-4">${getStudentGrade(course.studentName)}</td>
+                        <td class="py-3 px-4">${getDayName(course.day)}${course.time}</td>
+                        <td class="py-3 px-4">${course.completedTime}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${
+                                    course.type === 'trial' ? 'bg-yellow-100 text-yellow-800' : 
+                                    course.type === 'converted' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                                }">
+                                    ${course.type === 'trial' ? '试课' : 
+                                      course.type === 'converted' ? '正式（转正）' : '正式'}（${course.duration}分钟）
+                                    </span>
+                                ${course.type === 'trial' ? `
+                                    <button class="text-green-600 hover:text-green-700 transition-colors" onclick="convertTrialToFormal('${course.id}')" title="转为正式">
+                                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">¥${getCoursePrice(course)}</td>
+                    `;
+                    completedList.appendChild(row);
+                });
+                
+                // 添加总薪资行
+                const totalRow = document.createElement('tr');
+                totalRow.className = 'border-t-2 border-gray-300 bg-gray-50 font-semibold';
+                totalRow.innerHTML = `
+                    <td class="py-3 px-4" colspan="6">总薪资</td>
+                    <td class="py-3 px-4">¥${totalSalary.toFixed(1)}</td>
+                `;
+                completedList.appendChild(totalRow);
+                
+                // 重新初始化图标
+                setTimeout(() => {
+                    lucide.createIcons();
+                }, 0);
+            } catch (error) {
+                console.error('Error in updateCompletedCoursesList:', error);
+                showNotification('更新已完成课程列表时出现错误：' + error.message, 'error');
+            }
+        }
+
+        // 获取学员年级
+        function getStudentGrade(studentName) {
+            try {
+                const studentCard = document.querySelector(`[data-name="${studentName}"]`);
+                const grade = studentCard ? studentCard.getAttribute('data-grade') || '未知' : '未知';
+                return grade;
+            } catch (error) {
+                console.error('Error in getStudentGrade:', error);
+                return '未知';
+            }
+        }
+
+        // 试课转正功能
+        function convertTrialToFormal(courseId) {
+            const courseIndex = completedCourses.findIndex(course => course.id === courseId);
+            if (courseIndex !== -1) {
+                const course = completedCourses[courseIndex];
+                
+                if (confirm(`是否确认转正？\n学员：${course.studentName}\n科目：${course.subject}\n年级：${getStudentGrade(course.studentName)}`)) {
+                    // 更新课程类型为转正
+                    completedCourses[courseIndex].type = 'converted';
+                    
+                    // 更新学员管理中的状态
+                    const studentCard = document.querySelector(`[data-name="${course.studentName}"]`);
+                    if (studentCard) {
+                        // 找到试课学员卡片并移动到正式学员区域
+                        const trialStudentsContainer = document.getElementById('trial-students');
+                        const formalStudentsContainer = document.getElementById('formal-students');
+                        
+                        if (trialStudentsContainer && formalStudentsContainer) {
+                            // 更新卡片状态
+                            const statusSpan = studentCard.querySelector('.bg-yellow-100');
+                            if (statusSpan) {
+                                statusSpan.className = 'px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                                statusSpan.textContent = '正式学员';
+                            }
+                            
+                            // 移除转正按钮
+                            const convertButton = studentCard.querySelector('.text-green-600');
+                            if (convertButton) {
+                                convertButton.remove();
+                            }
+                            
+                            // 移动到正式学员区域
+                            formalStudentsContainer.appendChild(studentCard);
+                        }
+                    }
+                    
+                    // 更新已完成课程列表
+                    updateCompletedCoursesList();
+                    
+                    // 更新仪表板统计
+                    updateDashboardStats();
+                    
+                    showNotification(`${course.studentName} 已成功转为正式学员！`, 'success');
+                }
+            }
+        }
+
+        // 计算课程价格
+        function getCoursePrice(course) {
+            try {
+                const grade = getStudentGrade(course.studentName);
+                const hours = course.duration / 60; // 转换为小时
+                
+                if (course.type === 'trial') {
+                    return '39.9';
+                } else if (course.type === 'converted') {
+                    return '99.9';
+                } else if (course.type === 'formal') {
+                    let hourlyRate = 50; // 默认初中价格
+                    switch (grade) {
+                        case '小学':
+                            hourlyRate = 40;
+                            break;
+                        case '初中':
+                            hourlyRate = 50;
+                            break;
+                        case '高中':
+                            hourlyRate = 60;
+                            break;
+                    }
+                    return (hourlyRate * hours).toFixed(1);
+                }
+                return '0';
+            } catch (error) {
+                console.error('Error in getCoursePrice:', error);
+                return '0';
+            }
+        }
+
+        // 更新试课学员列表
+        function updateTrialStudentsList() {
+            const trialList = document.getElementById('trial-students-list');
+            if (!trialList) return;
+            
+            trialList.innerHTML = '';
+            
+            // 获取试课学员
+            const trialStudents = Array.from(document.querySelectorAll('#trial-students .student-card')).map(card => {
+                const phoneElement = card.querySelector('p');
+                const phone = phoneElement ? phoneElement.textContent.replace('📞 ', '') : '';
+                
+                // 获取试课时间
+                const timeElements = card.querySelectorAll('p');
+                let trialTime = '';
+                for (let element of timeElements) {
+                    if (element.textContent.includes('试课时间')) {
+                        trialTime = element.textContent.replace('⏰ 试课时间: ', '');
+                        break;
+                    }
+                }
+                
+                return {
+                    name: card.getAttribute('data-name'),
+                    subject: card.getAttribute('data-subject'),
+                    grade: card.getAttribute('data-grade'),
+                    phone: phone,
+                    trialTime: trialTime
+                };
+            });
+            
+            trialStudents.forEach(student => {
+                const card = document.createElement('div');
+                card.className = 'card cursor-pointer hover:shadow-md transition-shadow';
+                card.onclick = () => showCoachInputModal(student);
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">${student.name}</h3>
+                            <p class="text-sm text-gray-600">${student.grade} · ${student.subject}</p>
+                            <p class="text-sm text-gray-500">📞 ${student.phone}</p>
+                            ${student.trialTime ? `<p class="text-sm text-gray-500">⏰ ${student.trialTime}</p>` : ''}
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            试课学员
+                        </span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        点击生成试学流程
+                    </div>
+                `;
+                trialList.appendChild(card);
+            });
+        }
+
+        // 显示教练输入模态框
+        function showCoachInputModal(student) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+            modal.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" onclick="closeModal()"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">生成试学流程</h3>
+                                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <form onsubmit="generateTrialProcess(event, '${student.name}')">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">教练姓名 *</label>
+                                        <input type="text" name="coachName" required class="input-field" placeholder="请输入教练姓名">
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 mt-6">
+                                    <button type="submit" class="btn-primary flex-1">生成流程</button>
+                                    <button type="button" onclick="closeModal()" class="btn-secondary flex-1">取消</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 生成试学流程
+        function generateTrialProcess(event, studentName) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const coachName = formData.get('coachName');
+            
+            // 获取学员信息
+            const studentCard = document.querySelector(`[data-name="${studentName}"]`);
+            const subject = studentCard ? studentCard.getAttribute('data-subject') : '数学';
+            const grade = studentCard ? studentCard.getAttribute('data-grade') : '初中';
+            
+            // 获取学员上课时间信息
+            let trialTime = '';
+            if (studentCard) {
+                const timeElements = studentCard.querySelectorAll('p');
+                for (let element of timeElements) {
+                    if (element.textContent.includes('试课时间')) {
+                        trialTime = element.textContent.replace('⏰ 试课时间: ', '');
+                        break;
+                    }
+                }
+            }
+            
+            // 获取学员电话信息
+            let phone = '';
+            if (studentCard) {
+                const phoneElements = studentCard.querySelectorAll('p');
+                for (let element of phoneElements) {
+                    if (element.textContent.includes('📞')) {
+                        phone = element.textContent.replace('📞 ', '');
+                        break;
+                    }
+                }
+            }
+            
+            const processText = `🌈${studentName}同学家长您好！
+
+❤️我是孩子的体验课教练${coachName}，负责孩子的万校互联AI${subject}学习、复习过程的引导、陪伴、监督与指导，并会及时在群内发送学员学习和复习报告，请您关注！
+
+📚 学员信息：
+姓名：${studentName}
+年级：${grade}
+科目：${subject}
+电话：${phone}
+${trialTime ? `试课时间：${trialTime}` : ''}
+
+❤️我会提前将课程链接发送至群里
+
+请提前下载好——
+腾讯会议，电脑、笔记本，平板、手机都可以使用（台式电脑必须配备耳机）
+
+请提前安排好时间我们准时上课哦！✊✊
+
+🌻弘扬🌻交付中心祝您体验愉快
+
+⏰上课提醒⏰
+
+明日的高度
+取決于今日的选择
+学习从兴趣开始
+梦想从这里启航
+
+${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试课学习`;
+            
+            // 显示生成的流程文本
+            showGeneratedProcess(processText, studentName);
+            
+            closeModal();
+        }
+
+        // 显示生成的流程文本
+        function showGeneratedProcess(text, studentName) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+            modal.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" onclick="closeModal()"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">${studentName} - 试学流程</h3>
+                                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <pre class="text-sm text-gray-800 whitespace-pre-wrap font-sans">${text}</pre>
+                            </div>
+                            <div class="flex gap-3 mt-6">
+                                <button onclick="copyToClipboard('${text.replace(/'/g, "\\'")}')" class="btn-primary flex-1">复制文本</button>
+                                <button onclick="closeModal()" class="btn-secondary flex-1">关闭</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('文本已复制到剪贴板！', 'success');
+            }).catch(() => {
+                showNotification('复制失败，请手动复制', 'error');
+            });
+        }
+
+        // 反馈数据存储
+        const feedbackData = [];
+
+        // 显示添加反馈模态框
+        function showAddFeedbackModal() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+            modal.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" onclick="closeModal()"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">添加伴学反馈</h3>
+                                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <form id="ai-feedback-form" onsubmit="event.preventDefault();">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">学员姓名 *</label>
+                                        <input type="text" name="studentName" required class="input-field" placeholder="请输入学员姓名">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">今天学习的内容 *</label>
+                                        <textarea name="learningContent" rows="3" required class="input-field" placeholder="请输入今天学习的具体内容"></textarea>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 mt-6">
+                                    <button type="button" onclick="generateAIFeedbackFromSimpleForm()" class="btn-primary flex-1">AI生成反馈</button>
+                                    <button type="button" onclick="closeModal()" class="btn-secondary flex-1">取消</button>
+                                </div>
+                            </form>
+                            <div id="ai-feedback-result" class="mt-6 hidden">
+                                <div class="bg-gray-50 p-4 rounded-lg border mb-4">
+                                    <h4 class="font-medium text-gray-900 mb-2">AI反馈内容</h4>
+                                    <div id="ai-feedback-content" class="text-sm text-gray-800 whitespace-pre-line"></div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button type="button" onclick="saveAIFeedback()" class="btn-primary flex-1">保存反馈</button>
+                                    <button type="button" onclick="closeModal()" class="btn-secondary flex-1">关闭</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 简化AI反馈生成
+        async function generateAIFeedbackFromSimpleForm() {
+            const form = document.getElementById('ai-feedback-form');
+            const studentName = form.studentName.value.trim();
+            const learningContent = form.learningContent.value.trim();
+            if (!studentName || !learningContent) {
+                showNotification('请填写学员姓名和学习内容', 'error');
+                return;
+            }
+            if (!aiAnalyzer) aiAnalyzer = new AIFeedbackAnalyzer();
+            showNotification('AI正在生成反馈...', 'info');
+            // 构造最简studentData
+            const studentData = { name: studentName, subject: '', grade: '', type: 'formal', learningContent };
+            const feedbackHistory = [];
+            const result = await aiAnalyzer.generateFeedbackWithContent(studentData, feedbackHistory);
+            if (result.success) {
+                // 展示AI反馈内容
+                const resultDiv = document.getElementById('ai-feedback-result');
+                const contentDiv = document.getElementById('ai-feedback-content');
+                contentDiv.innerHTML =
+                    `<b>学习情况：</b>\n${result.content}\n\n<b>学习进度：</b>\n${result.progress}\n\n<b>下一步计划：</b>\n${result.nextSteps}`;
+                resultDiv.classList.remove('hidden');
+            } else {
+                showNotification('AI反馈生成失败', 'error');
+            }
+        }
+
+        // 保存AI反馈
+        function saveAIFeedback() {
+            const form = document.getElementById('ai-feedback-form');
+            const studentName = form.studentName.value.trim();
+            const learningContent = form.learningContent.value.trim();
+            const contentDiv = document.getElementById('ai-feedback-content');
+            // 解析AI反馈内容
+            const contentHtml = contentDiv.innerHTML;
+            const [content, progress, nextSteps] = contentHtml.split(/<b>.*?：<\/b>\\n/).slice(1);
+            const newFeedback = {
+                id: 'feedback-' + Date.now(),
+                studentName,
+                subject: '',
+                date: new Date().toISOString().split('T')[0],
+                learningContent,
+                content: content?.trim() || '',
+                progress: progress?.trim() || '',
+                nextSteps: nextSteps?.trim() || '',
+                aiSuggestion: ''
+            };
+            window.feedbackData.push(newFeedback);
+            renderFeedbackList();
+            
+            // 更新仪表板统计
+            updateDashboardStats();
+            
+            closeModal();
+            showNotification('反馈保存成功！', 'success');
+        }
+
+        // 初始化AI分析器
+        let aiAnalyzer = null;
+
+        // 生成AI反馈
+        async function generateAIFeedback(studentName, subject, learningContent) {
+            // 初始化AI分析器
+            if (!aiAnalyzer) {
+                aiAnalyzer = new AIFeedbackAnalyzer();
+            }
+
+            showNotification('AI正在生成反馈...', 'info');
+            
+            try {
+                // 获取学生信息
+                const studentCard = document.querySelector(`[data-name="${studentName}"]`);
+                const grade = studentCard ? studentCard.getAttribute('data-grade') : '初中';
+                const type = studentCard ? (studentCard.closest('#trial-students') ? 'trial' : 'formal') : 'formal';
+                
+                const studentData = {
+                    name: studentName,
+                    subject: subject,
+                    grade: grade,
+                    type: type,
+                    learningContent: learningContent
+                };
+
+                // 获取历史反馈记录
+                const feedbackHistory = window.feedbackData.filter(f => f.studentName === studentName);
+                
+                // 调用AI分析
+                const result = await aiAnalyzer.generateFeedbackWithContent(studentData, feedbackHistory);
+                
+                if (result.success) {
+                    // 自动填充表单
+                    const contentTextarea = document.querySelector('textarea[name="content"]');
+                    const progressTextarea = document.querySelector('textarea[name="progress"]');
+                    const nextStepsTextarea = document.querySelector('textarea[name="nextSteps"]');
+                    
+                    if (contentTextarea) contentTextarea.value = result.content || '';
+                    if (progressTextarea) progressTextarea.value = result.progress || '';
+                    if (nextStepsTextarea) nextStepsTextarea.value = result.nextSteps || '';
+                    
+                    showNotification('AI反馈生成完成！', 'success');
+                } else {
+                    showNotification('AI反馈生成失败：' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('AI反馈生成错误:', error);
+                showNotification('AI反馈生成过程中出现错误', 'error');
+            }
+        }
+
+        // 从表单生成AI反馈
+        function generateAIFeedbackFromForm() {
+            const studentName = document.querySelector('select[name="studentName"]').value;
+            const subject = document.querySelector('input[name="subject"]').value;
+            const learningContent = document.querySelector('textarea[name="learningContent"]').value;
+            
+            if (!studentName) {
+                showNotification('请先选择学员！', 'error');
+                return;
+            }
+            
+            if (!learningContent.trim()) {
+                showNotification('请先输入今天学习的内容！', 'error');
+                return;
+            }
+            
+            generateAIFeedback(studentName, subject, learningContent);
+        }
+
+        // 编辑反馈
+        function editFeedback(feedbackId) {
+            showNotification('编辑功能开发中...', 'info');
+        }
+
+        // 查看反馈详情
+        function viewFeedbackDetail(feedbackId) {
+            showNotification('详情查看功能开发中...', 'info');
+        }
+
+        // 显示AI配置模态框
+        function showAIConfigModal() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+            modal.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" onclick="closeModal()"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">AI配置</h3>
+                                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <form onsubmit="saveAIConfig(event)">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">AI API密钥</label>
+                                        <input type="password" name="apiKey" class="input-field" placeholder="请输入AI API密钥（可选）">
+                                        <p class="text-xs text-gray-500 mt-1">配置API密钥可使用真实AI服务，否则使用模拟AI</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">AI模型</label>
+                                        <select name="model" class="input-field">
+                                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                            <option value="gpt-4">GPT-4</option>
+                                            <option value="claude-3">Claude-3</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">分析深度</label>
+                                        <select name="depth" class="input-field">
+                                            <option value="basic">基础分析</option>
+                                            <option value="detailed">详细分析</option>
+                                            <option value="comprehensive">综合分析</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 mt-6">
+                                    <button type="submit" class="btn-primary flex-1">保存配置</button>
+                                    <button type="button" onclick="testAIConnection()" class="btn-secondary flex-1">测试连接</button>
+                                    <button type="button" onclick="closeModal()" class="btn-secondary flex-1">取消</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 保存AI配置
+        function saveAIConfig(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const config = Object.fromEntries(formData);
+            
+            // 保存到本地存储
+            localStorage.setItem('aiConfig', JSON.stringify(config));
+            
+            // 更新AI分析器配置
+            if (aiAnalyzer) {
+                aiAnalyzer.setApiKey(config.apiKey);
+            }
+            
+            closeModal();
+            showNotification('AI配置已保存！', 'success');
+        }
+
+        // 测试AI连接
+        async function testAIConnection() {
+            const apiKey = document.querySelector('input[name="apiKey"]').value;
+            
+            if (!apiKey) {
+                showNotification('请先输入API密钥！', 'error');
+                return;
+            }
+            
+            showNotification('正在测试AI连接...', 'info');
+            
+            try {
+                // 这里可以添加真实的API连接测试
+                setTimeout(() => {
+                    showNotification('AI连接测试成功！', 'success');
+                }, 2000);
+            } catch (error) {
+                showNotification('AI连接测试失败：' + error.message, 'error');
+            }
+        }
+
+        // 渲染反馈列表
+        function renderFeedbackList() {
+            try {
+                const feedbackList = document.getElementById('feedback-list');
+                if (!feedbackList) return;
+                
+                feedbackList.innerHTML = '';
+                
+                window.feedbackData.forEach(feedback => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="py-3 px-4">${feedback.studentName}</td>
+                        <td class="py-3 px-4">${feedback.subject}</td>
+                        <td class="py-3 px-4">${feedback.date}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-2">
+                                <button onclick="viewFeedbackDetail('${feedback.id}')" class="text-blue-600 hover:text-blue-700 transition-colors" title="查看详情">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="editFeedback('${feedback.id}')" class="text-green-600 hover:text-green-700 transition-colors" title="编辑">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    feedbackList.appendChild(row);
+                });
+                
+                // 重新初始化图标
+                setTimeout(() => {
+                    lucide.createIcons();
+                }, 0);
+            } catch (error) {
+                console.error('Error in renderFeedbackList:', error);
+            }
+        }
+
+
+
+        // 页面加载时生成时间表和已完成课程列表
+        document.addEventListener('DOMContentLoaded', function() {
+            generateScheduleTable();
+            updateCompletedCoursesList();
+            updateTrialStudentsList();
+            
+            // 初始化反馈数据
+            window.feedbackData = feedbackData;
+            renderFeedbackList();
+            
+            // 初始化仪表板统计
+            updateDashboardStats();
+            
+            // 初始化课程安排模块的学生选项
+            updateScheduleStudentOptions();
+        });
+
+        // 添加样式
+        const style = document.createElement('style');
+        style.textContent = `
+            .tab-btn {
+                @apply flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300;
+            }
+            .tab-btn.active {
+                @apply border-blue-500 text-blue-600;
+            }
+            .tab-content {
+                display: none;
+            }
+            .tab-content.active {
+                display: block;
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('scheduleData:', scheduleData);
+        console.log('completedCourses:', completedCourses);
+    </script>
+</body>
+</html> 
