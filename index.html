@@ -21,54 +21,134 @@
             @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
         }
     </style>
+    <!-- Firebase App (核心) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<!-- Firebase Database -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  // 你的 firebaseConfig
+  const firebaseConfig = {
+    apiKey: "AIzaSyCECwMZOu2iMfmm4wMAWwMdDEjW8Pu3Bdg",
+    authDomain: "waanxiaohulian.firebaseapp.com",
+    databaseURL: "https://waanxiaohulian-default-rtdb.firebaseio.com",
+    projectId: "waanxiaohulian",
+    storageBucket: "waanxiaohulian.firebasestorage.app",
+    messagingSenderId: "793340262715",
+    appId: "1:793340262715:web:f67e9879b7ee05a2d15f1e",
+    measurementId: "G-11Z6XV1QF2"
+  };
+  // 初始化
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- 头部 -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900">万校互联教练系统</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600">欢迎回来，教练</span>
-                </div>
-            </div>
+    <!-- 登录/注册界面 -->
+    <div id="auth-container" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc;position:fixed;z-index:100;width:100vw;height:100vh;top:0;left:0;">
+      <div style="background:white;padding:2.5rem 2rem;border-radius:1rem;box-shadow:0 4px 32px #0001;min-width:320px;max-width:90vw;">
+        <h2 id="auth-title" style="font-size:1.5rem;font-weight:600;text-align:center;margin-bottom:1.5rem;color:#2563eb;">登录</h2>
+        <form id="auth-form">
+          <input id="auth-phone" type="tel" pattern="[0-9]{11}" placeholder="手机号" required style="width:100%;margin-bottom:1rem;padding:0.75rem;border-radius:0.5rem;border:1px solid #d1d5db;outline:none;font-size:1rem;">
+          <input id="auth-password" type="password" placeholder="密码" required style="width:100%;margin-bottom:1.5rem;padding:0.75rem;border-radius:0.5rem;border:1px solid #d1d5db;outline:none;font-size:1rem;">
+          <button id="auth-submit" type="submit" style="width:100%;background:#2563eb;color:white;font-weight:600;padding:0.75rem;border:none;border-radius:0.5rem;font-size:1rem;">登录</button>
+        </form>
+        <div style="text-align:center;margin-top:1rem;">
+          <span id="auth-toggle-text">没有账号？</span>
+          <a href="#" id="auth-toggle-link" style="color:#2563eb;text-decoration:underline;">注册</a>
         </div>
-    </header>
+        <div id="auth-error" style="color:#ef4444;text-align:center;margin-top:1rem;display:none;"></div>
+      </div>
+    </div>
+    <!-- 顶部导航栏（登录后显示） -->
+    <nav id="main-navbar" style="display:none;position:sticky;top:0;z-index:40;background:#2563eb;color:#fff;box-shadow:0 2px 8px #0001;">
+      <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0.5rem 2rem;">
+        <div style="display:flex;align-items:center;gap:2rem;">
+          <span style="font-weight:700;font-size:1.2rem;letter-spacing:1px;">万校互联教练系统</span>
+          <button class="nav-btn" data-tab="dashboard" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">仪表盘</button>
+          <button class="nav-btn" data-tab="students" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">学生管理</button>
+          <button class="nav-btn" data-tab="schedule" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">课程安排</button>
+          <button class="nav-btn" data-tab="completed" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">已完成课程</button>
+          <button class="nav-btn" data-tab="feedback" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">AI反馈</button>
+        </div>
+        <div id="navbar-user-bar" style="display:none;align-items:center;gap:1.2rem;">
+          <span id="navbar-user-phone" style="color:#fff;font-weight:500;font-size:1rem;padding:0 0.5rem;"></span>
+          <button id="navbar-logout-btn" style="background:transparent;color:#fff;border:1.5px solid #fff;border-radius:1.2rem;padding:0.25rem 1.2rem;font-size:1rem;cursor:pointer;transition:background 0.2s, color 0.2s;">退出登录</button>
+        </div>
+      </div>
+    </nav>
+
+    <script>
+              // 切换主内容区
+        function showTab(tab) {
+          const tabIds = ['dashboard','students','schedule','completed','feedback'];
+          tabIds.forEach(id => {
+            const el = document.getElementById(id+'-content');
+            if (el) el.style.display = (id===tab) ? 'block' : 'none';
+          });
+          // 高亮导航按钮
+          document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.style.background = btn.dataset.tab===tab ? '#1e40af' : 'none';
+          });
+        }
+      // 导航栏事件
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.onclick = function() {
+            showTab(btn.dataset.tab);
+          };
+        });
+      });
+      // 登录后显示导航栏和默认tab
+      function showMainContent(phone) {
+        document.getElementById('auth-container').style.display = 'none';
+        document.getElementById('navbar-user-bar').style.display = 'flex';
+        document.getElementById('navbar-user-phone').textContent = phone;
+        document.getElementById('main-navbar').style.display = '';
+        document.body.classList.remove('auth-locked');
+        
+        // 确保所有内容区域隐藏，然后显示仪表板
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.style.display = 'none';
+        });
+        showTab('dashboard'); // 默认显示仪表盘
+      }
+      // 退出登录时隐藏导航栏
+      function logout() {
+        localStorage.removeItem('loginPhone');
+        document.getElementById('auth-container').style.display = 'flex';
+        document.getElementById('navbar-user-bar').style.display = 'none';
+        document.getElementById('main-navbar').style.display = 'none';
+        document.body.classList.add('auth-locked');
+      }
+      
+      // 绑定退出登录事件
+      document.addEventListener('DOMContentLoaded', function() {
+        const logoutBtn = document.getElementById('logout-btn');
+        const navbarLogoutBtn = document.getElementById('navbar-logout-btn');
+        
+        if (logoutBtn) {
+          logoutBtn.onclick = logout;
+        }
+        if (navbarLogoutBtn) {
+          navbarLogoutBtn.onclick = logout;
+        }
+      });
+      // 页面加载时自动检测登录状态
+      window.addEventListener('DOMContentLoaded', function() {
+        const phone = localStorage.getItem('loginPhone');
+        if (phone) {
+          showMainContent(phone);
+        } else {
+          document.getElementById('auth-container').style.display = 'flex';
+          document.getElementById('navbar-user-bar').style.display = 'none';
+          document.getElementById('main-navbar').style.display = 'none';
+          document.body.classList.add('auth-locked');
+        }
+      });
+    </script>
 
     <!-- 主要内容 -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- 标签页 -->
-        <div class="border-b border-gray-200 mb-8">
-            <nav class="-mb-px flex space-x-8">
-                <button onclick="switchTab('dashboard')" class="tab-btn active" data-tab="dashboard">
-                    <i data-lucide="trending-up" class="w-4 h-4"></i>
-                    仪表板
-                </button>
-                <button onclick="switchTab('students')" class="tab-btn" data-tab="students">
-                    <i data-lucide="users" class="w-4 h-4"></i>
-                    学生管理
-                </button>
-                <button onclick="switchTab('schedule')" class="tab-btn" data-tab="schedule">
-                    <i data-lucide="calendar" class="w-4 h-4"></i>
-                    课程安排
-                </button>
-                <button onclick="switchTab('completed')" class="tab-btn" data-tab="completed">
-                    <i data-lucide="check-circle" class="w-4 h-4"></i>
-                    已完成课程
-                </button>
-                <button onclick="switchTab('trials')" class="tab-btn" data-tab="trials">
-                    <i data-lucide="book-open" class="w-4 h-4"></i>
-                    试学流程生成
-                </button>
-                <button onclick="switchTab('feedback')" class="tab-btn" data-tab="feedback">
-                    <i data-lucide="message-square" class="w-4 h-4"></i>
-                    伴学反馈
-                </button>
-            </nav>
-        </div>
-
         <!-- 内容区域 -->
         <div id="content">
             <!-- 仪表板 -->
@@ -382,23 +462,18 @@
         // 初始化图标
         lucide.createIcons();
 
-        // 标签页切换功能
+        // 标签页切换功能 - 兼容顶部导航栏
         function switchTab(tabName) {
             // 隐藏所有内容
             document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // 移除所有标签的active类
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
+                content.style.display = 'none';
             });
             
             // 显示选中的内容
-            document.getElementById(tabName + '-content').classList.add('active');
-            
-            // 添加active类到选中的标签
-            event.target.classList.add('active');
+            const targetContent = document.getElementById(tabName + '-content');
+            if (targetContent) {
+                targetContent.style.display = 'block';
+            }
             
             // 如果切换到已完成课程页面，更新列表
             if (tabName === 'completed') {
@@ -742,11 +817,8 @@
                 return;
             }
             
-            scheduleData.push(newCourse);
-            generateScheduleTable();
-            
-            // 更新仪表板统计
-            updateDashboardStats();
+            // 保存到Firebase
+            firebase.database().ref('schedule').push(newCourse);
             
             showNotification(`试课学员 ${studentData.name} 已自动添加到课程安排！`, 'success');
         }
@@ -884,8 +956,8 @@
             return card;
         }
 
-        // 课程数据 - 初始为空
-        const scheduleData = [];
+        // 课程数据 - 从Firebase加载
+        let scheduleData = [];
 
         // 学员颜色映射 - 动态生成
         const studentColors = {};
@@ -914,9 +986,7 @@
             const tableBody = document.getElementById('schedule-table-body');
             if (!tableBody) return;
 
-
             tableBody.innerHTML = '';
-            
             // 生成时间行（8:00-24:00，每30分钟一行）
             for (let hour = 8; hour <= 23; hour++) {
                 for (let minute = 0; minute < 60; minute += 30) {
@@ -934,77 +1004,49 @@
                         cell.className = 'border border-gray-200 px-1 py-1 text-xs relative';
                         cell.setAttribute('data-day', day);
                         cell.setAttribute('data-time', timeString);
-                        
                         // 查找该时间段的课程（只显示未完成的）
                         const courses = scheduleData.filter(course => {
                             if (course.status === 'completed') return false;
-                            
                             const courseTime = course.time;
                             const courseHour = parseInt(courseTime.split(':')[0]);
                             const courseMinute = parseInt(courseTime.split(':')[1]);
                             const courseStartMinutes = courseHour * 60 + courseMinute;
                             const courseEndMinutes = courseStartMinutes + course.duration;
-                            
                             const currentMinutes = hour * 60 + minute;
                             const nextMinutes = currentMinutes + 30;
-                            
                             const matches = course.day === day && 
                                            courseStartMinutes <= currentMinutes && 
                                            courseEndMinutes > currentMinutes;
-                            
-
-                            
                             return matches;
                         });
-
-                    if (courses.length > 0) {
-                        const course = courses[0];
-                        const studentColor = generateStudentColor(course.studentName);
-                        
-                        // 计算课程在这个时间段的位置
-                        const courseTime = course.time;
-                        const courseHour = parseInt(courseTime.split(':')[0]);
-                        const courseMinute = parseInt(courseTime.split(':')[1]);
-                        const courseStartMinutes = courseHour * 60 + courseMinute;
-                        const currentMinutes = hour * 60 + minute;
-                        
-                        // 如果是课程开始时间，显示完整信息
-                        if (courseStartMinutes === currentMinutes) {
+                        if (courses.length > 0) {
+                            const course = courses[0];
+                            const studentColor = generateStudentColor(course.studentName);
+                            const courseTime = course.time;
+                            const courseHour = parseInt(courseTime.split(':')[0]);
+                            const courseMinute = parseInt(courseTime.split(':')[1]);
+                            const courseStartMinutes = courseHour * 60 + courseMinute;
+                            const currentMinutes = hour * 60 + minute;
+                            // 所有占用格都显示姓名和√按钮
                             cell.className += ` ${studentColor.bg} ${studentColor.text} ${studentColor.border}`;
-                            cell.innerHTML = `
-                                <div class="font-medium text-xs">${course.studentName}</div>
-                                <div class="text-xs opacity-75">${course.subject}</div>
-                                <div class="text-xs opacity-75">${course.type === 'trial' ? '试课' : '正课'}</div>
-                                <button class="absolute top-1 right-1 text-green-600 hover:text-green-700 transition-colors" onclick="completeCourse('${course.id}', this)" title="标记完成">
-                                    <i data-lucide="check" class="w-3 h-3"></i>
-                                </button>
-                            `;
-                            
-                            // 添加点击事件（排除按钮区域）
+                            cell.innerHTML = `<div class=\"font-medium text-xs\">${course.studentName}</div>
+                                <button class=\"absolute top-1 right-1 text-green-600 hover:text-green-700 transition-colors\" onclick=\"event.stopPropagation();completeCourseConfirm('${course.id}')\" title=\"标记完成\"><i data-lucide=\"check\" class=\"w-3 h-3\"></i></button>`;
                             cell.onclick = (event) => {
                                 if (event.target.closest('button')) {
                                     return;
                                 }
-                                showCourseDetails(course);
+                                showCourseStudentDetail(course);
                             };
                             cell.style.cursor = 'pointer';
-                        } else {
-                            // 如果不是开始时间，只显示背景色表示延续
-                            cell.className += ` ${studentColor.bg} opacity-50`;
+                            setTimeout(() => {
+                                lucide.createIcons();
+                            }, 0);
                         }
-                        
-                        // 重新初始化图标
-                        setTimeout(() => {
-                            lucide.createIcons();
-                        }, 0);
-                    }
-                    
-                    row.appendChild(cell);
-                });
-                
-                tableBody.appendChild(row);
+                        row.appendChild(cell);
+                    });
+                    tableBody.appendChild(row);
+                }
             }
-        }
         }
 
         // 显示课程详情
@@ -1219,11 +1261,8 @@
                 return;
             }
             
-            scheduleData.push(newCourse);
-            generateScheduleTable();
-            
-            // 更新仪表板统计
-            updateDashboardStats();
+            // 保存到Firebase
+            firebase.database().ref('schedule').push(newCourse);
             
             closeModal();
             showNotification(`课程安排成功！${courseData.studentName} - ${studentInfo.subject}`, 'success');
@@ -1241,8 +1280,8 @@
             showNotification('编辑功能开发中...', 'info');
         }
 
-        // 已完成课程记录 - 只记录当月的
-        const completedCourses = [];
+        // 已完成课程记录 - 从Firebase加载
+        let completedCourses = [];
         
         // 获取所有已完成的课程
         function getCurrentMonthCompletedCourses() {
@@ -1270,18 +1309,11 @@
                             status: 'completed'
                         };
                         
-                        // 添加到已完成记录
-                        completedCourses.push(completedCourse);
+                        // 保存到Firebase已完成课程
+                        firebase.database().ref('completed').push(completedCourse);
                         
-                        // 从课程安排中移除
-                        scheduleData.splice(courseIndex, 1);
-                        
-                        // 重新生成时间表
-                        generateScheduleTable();
-                        updateCompletedCoursesList();
-                        
-                        // 更新仪表板统计
-                        updateDashboardStats();
+                        // 从Firebase课程安排中删除
+                        firebase.database().ref('schedule/' + courseId).remove();
                         
                         // 显示成功消息
                         showNotification(`${course.studentName} 的课程已完成！`, 'success');
@@ -1301,11 +1333,8 @@
             if (courseIndex !== -1) {
                 const course = scheduleData[courseIndex];
                 if (confirm(`确定要删除 ${course.studentName} 的课程吗？`)) {
-                    scheduleData.splice(courseIndex, 1);
-                    generateScheduleTable();
-                    
-                    // 更新仪表板统计
-                    updateDashboardStats();
+                    // 从Firebase删除
+                    firebase.database().ref('schedule/' + courseId).remove();
                     
                     closeModal();
                     showNotification(`课程已删除！`, 'success');
@@ -1681,8 +1710,8 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
             });
         }
 
-        // 反馈数据存储
-        const feedbackData = [];
+        // 反馈数据存储 - 从Firebase加载
+        let feedbackData = [];
 
         // 显示添加反馈模态框
         function showAddFeedbackModal() {
@@ -1783,11 +1812,9 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
                 nextSteps: nextSteps?.trim() || '',
                 aiSuggestion: ''
             };
-            window.feedbackData.push(newFeedback);
-            renderFeedbackList();
             
-            // 更新仪表板统计
-            updateDashboardStats();
+            // 保存到Firebase
+            firebase.database().ref('feedback').push(newFeedback);
             
             closeModal();
             showNotification('反馈保存成功！', 'success');
@@ -1978,26 +2005,57 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
                 
                 feedbackList.innerHTML = '';
                 
-                window.feedbackData.forEach(feedback => {
-                    const row = document.createElement('tr');
-                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
-                    row.innerHTML = `
-                        <td class="py-3 px-4">${feedback.studentName}</td>
-                        <td class="py-3 px-4">${feedback.subject}</td>
-                        <td class="py-3 px-4">${feedback.date}</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center gap-2">
-                                <button onclick="viewFeedbackDetail('${feedback.id}')" class="text-blue-600 hover:text-blue-700 transition-colors" title="查看详情">
-                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                </button>
-                                <button onclick="editFeedback('${feedback.id}')" class="text-green-600 hover:text-green-700 transition-colors" title="编辑">
-                                    <i data-lucide="edit" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </td>
+                if (feedbackData.length === 0) {
+                    feedbackList.innerHTML = `
+                        <div class="text-center py-12">
+                            <i data-lucide="message-square" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">暂无反馈记录</h3>
+                            <p class="text-gray-500 mb-4">开始添加伴学反馈后，这里会显示反馈列表</p>
+                            <button onclick="showAddFeedbackModal()" class="btn-primary">
+                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                添加第一个反馈
+                            </button>
+                        </div>
                     `;
-                    feedbackList.appendChild(row);
-                });
+                    return;
+                }
+                
+                // 创建表格结构
+                feedbackList.innerHTML = `
+                    <div class="card">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">学员姓名</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">科目</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">日期</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${feedbackData.map(feedback => `
+                                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                            <td class="py-3 px-4">${feedback.studentName}</td>
+                                            <td class="py-3 px-4">${feedback.subject || '-'}</td>
+                                            <td class="py-3 px-4">${feedback.date}</td>
+                                            <td class="py-3 px-4">
+                                                <div class="flex items-center gap-2">
+                                                    <button onclick="viewFeedbackDetail('${feedback.id}')" class="text-blue-600 hover:text-blue-700 transition-colors" title="查看详情">
+                                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <button onclick="editFeedback('${feedback.id}')" class="text-green-600 hover:text-green-700 transition-colors" title="编辑">
+                                                        <i data-lucide="edit" class="w-4 h-4"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
                 
                 // 重新初始化图标
                 setTimeout(() => {
@@ -2012,12 +2070,14 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
 
         // 页面加载时生成时间表和已完成课程列表
         document.addEventListener('DOMContentLoaded', function() {
+            // 确保默认显示仪表板
+            showTab('dashboard');
+            
             generateScheduleTable();
             updateCompletedCoursesList();
             updateTrialStudentsList();
             
             // 初始化反馈数据
-            window.feedbackData = feedbackData;
             renderFeedbackList();
             
             // 初始化仪表板统计
@@ -2036,10 +2096,14 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
             .tab-btn.active {
                 @apply border-blue-500 text-blue-600;
             }
-            .tab-content {
+            /* .tab-content {
                 display: none;
             }
             .tab-content.active {
+                display: block;
+            } */
+            /* 确保内容区域正确显示 */
+            #dashboard-content {
                 display: block;
             }
         `;
@@ -2047,6 +2111,263 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
 
         console.log('scheduleData:', scheduleData);
         console.log('completedCourses:', completedCourses);
+
+        // 测试写入一条数据
+        firebase.database().ref('test').set({
+          hello: "world"
+        });
+
+        // 测试读取数据
+        firebase.database().ref('test').on('value', (snapshot) => {
+          const data = snapshot.val();
+          console.log("Firebase 读取到的数据：", data);
+        });
+
+        // 添加学生到 Firebase
+        function addStudentToFirebase(student) {
+          firebase.database().ref('students').push(student);
+        }
+
+        // 删除学生
+        function deleteStudentFromFirebase(studentId) {
+          firebase.database().ref('students/' + studentId).remove();
+        }
+
+        // 渲染学生列表
+        function renderStudentList(students) {
+          const formalContainer = document.getElementById('formal-students');
+          const trialContainer = document.getElementById('trial-students');
+          formalContainer.innerHTML = '';
+          trialContainer.innerHTML = '';
+          students.forEach(student => {
+            const card = createStudentCard(student);
+            // 修改删除按钮事件
+            const delBtn = card.querySelector('button[onclick^="deleteStudent"]');
+            if (delBtn) {
+              delBtn.setAttribute('onclick', `deleteStudentFromFirebase('${student.id}')`);
+            }
+            if (student.type === 'trial') {
+              trialContainer.appendChild(card);
+            } else {
+              formalContainer.appendChild(card);
+            }
+          });
+        }
+
+        // 监听并渲染学生列表
+        firebase.database().ref('students').on('value', (snapshot) => {
+          const studentsObj = snapshot.val() || {};
+          const students = Object.entries(studentsObj).map(([id, data]) => ({ id, ...data }));
+          renderStudentList(students);
+
+          // 自动同步window.studentMap
+          const studentMap = {};
+          students.forEach(s => {
+            studentMap[s.name] = { ...s };
+          });
+          window.studentMap = studentMap;
+
+          // 自动为所有试课学员同步课程安排
+          firebase.database().ref('schedule').once('value').then(scheduleSnap => {
+            const scheduleObj = scheduleSnap.val() || {};
+            const scheduledTrialNames = Object.values(scheduleObj)
+              .filter(c => c.type === 'trial')
+              .map(c => c.studentName + (c.trialTime || ''));
+            students.forEach(student => {
+              if (student.type === 'trial' && student.trialTime) {
+                const key = student.name + student.trialTime;
+                if (!scheduledTrialNames.includes(key)) {
+                  // 自动添加试课课程
+                  const trialDate = new Date(student.trialTime);
+                  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                  const day = dayNames[trialDate.getDay()];
+                  const time = trialDate.getHours().toString().padStart(2, '0') + ':' + trialDate.getMinutes().toString().padStart(2, '0');
+                  const newCourse = {
+                    studentName: student.name,
+                    subject: student.subject,
+                    day: day,
+                    time: time,
+                    duration: 60,
+                    type: 'trial',
+                    status: 'scheduled',
+                    trialTime: student.trialTime,
+                    phone: student.phone || ''
+                  };
+                  firebase.database().ref('schedule').push(newCourse);
+                }
+              }
+            });
+          });
+        });
+
+        // 监听课程安排数据
+        firebase.database().ref('schedule').on('value', (snapshot) => {
+          const scheduleObj = snapshot.val() || {};
+          scheduleData = Object.entries(scheduleObj).map(([id, data]) => ({ id, ...data }));
+          generateScheduleTable();
+          updateDashboardStats();
+        });
+
+        // 监听已完成课程数据
+        firebase.database().ref('completed').on('value', (snapshot) => {
+          const completedObj = snapshot.val() || {};
+          completedCourses = Object.entries(completedObj).map(([id, data]) => ({ id, ...data }));
+          updateCompletedCoursesList();
+          updateDashboardStats();
+        });
+
+        // 监听反馈数据
+        firebase.database().ref('feedback').on('value', (snapshot) => {
+          const feedbackObj = snapshot.val() || {};
+          feedbackData = Object.entries(feedbackObj).map(([id, data]) => ({ id, ...data }));
+          renderFeedbackList();
+          updateDashboardStats();
+        });
+
+        // 替换原有 addNewStudent 逻辑
+        function addNewStudent(event) {
+          event.preventDefault();
+          const formData = new FormData(event.target);
+          const studentData = Object.fromEntries(formData);
+          addStudentToFirebase(studentData);
+          closeModal();
+          showNotification(`学生 ${studentData.name} 添加成功！`, 'success');
+        }
+
+        document.getElementById('auth-form').onsubmit = async function(e) {
+          e.preventDefault();
+          console.log('表单提交事件触发');
+          authError.style.display = 'none';
+          const phone = document.getElementById('auth-phone').value.trim();
+          const password = document.getElementById('auth-password').value;
+          console.log('输入手机号:', phone, '输入密码:', password);
+          if (!/^\d{11}$/.test(phone)) {
+            authError.textContent = '请输入11位手机号';
+            authError.style.display = 'block';
+            console.log('手机号格式错误');
+            return;
+          }
+          try {
+            if (isLogin) {
+              // 登录：查找手机号，校验密码
+              const snap = await firebase.database().ref('users/' + phone).once('value');
+              const user = snap.val();
+              console.log('查到的用户：', user);
+              if (!user) throw new Error('用户不存在');
+              if (user.password !== password) throw new Error('密码错误');
+              // 登录成功，记录状态
+              localStorage.setItem('loginPhone', phone);
+              console.log('登录成功，进入主页面');
+              showMainContent(phone);
+            } else {
+              // 注册：手机号唯一
+              const snap = await firebase.database().ref('users/' + phone).once('value');
+              if (snap.exists()) throw new Error('手机号已注册');
+              await firebase.database().ref('users/' + phone).set({
+                phone,
+                password,
+                createdAt: new Date().toISOString()
+              });
+              localStorage.setItem('loginPhone', phone);
+              console.log('注册成功，进入主页面');
+              showMainContent(phone);
+            }
+          } catch (err) {
+            console.error('登录/注册出错：', err);
+            authError.textContent = err.message;
+            authError.style.display = 'block';
+          }
+        };
+
+        let isLogin = true;
+        const authTitle = document.getElementById('auth-title');
+        const authSubmit = document.getElementById('auth-submit');
+        const authToggleText = document.getElementById('auth-toggle-text');
+        const authToggleLink = document.getElementById('auth-toggle-link');
+        const authError = document.getElementById('auth-error');
+
+        // 在末尾添加详情弹窗函数
+        function showCourseStudentDetail(course) {
+            // 优先用course.phone，没有则从window.studentMap查找
+            let phone = course.phone;
+            if (!phone && window.studentMap && window.studentMap[course.studentName]) {
+                phone = window.studentMap[course.studentName].phone || '';
+            }
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+            modal.innerHTML = `
+                <div class=\"flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0\">
+                    <div class=\"fixed inset-0 transition-opacity\" aria-hidden=\"true\">
+                        <div class=\"absolute inset-0 bg-gray-500 opacity-75\" onclick=\"closeModal()\"></div>
+                    </div>
+                    <span class=\"hidden sm:inline-block sm:align-middle sm:h-screen\" aria-hidden=\"true\">&#8203;</span>
+                    <div class=\"inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full\">
+                        <div class=\"bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4\">
+                            <div class=\"flex items-center justify-between mb-4\">
+                                <h3 class=\"text-lg leading-6 font-medium text-gray-900\">学员详情</h3>
+                                <button onclick=\"closeModal()\" class=\"text-gray-400 hover:text-gray-600 transition-colors\">
+                                    <i data-lucide=\"x\" class=\"w-5 h-5\"></i>
+                                </button>
+                            </div>
+                            <div class=\"space-y-3\">
+                                <div><span class=\"font-medium text-gray-700\">姓名：</span><span class=\"text-gray-900\">${course.studentName}</span></div>
+                                <div><span class=\"font-medium text-gray-700\">科目：</span><span class=\"text-gray-900\">${course.subject}</span></div>
+                                <div><span class=\"font-medium text-gray-700\">上课时间：</span><span class=\"text-gray-900\">${getDayName(course.day)} ${course.time}</span></div>
+                                <div><span class=\"font-medium text-gray-700\">电话：</span><span class=\"text-gray-900\">${phone || ''}</span></div>
+                            </div>
+                            <div class=\"flex gap-3 mt-6\">
+                                <button onclick=\"closeModal()\" class=\"btn-secondary flex-1\">关闭</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 在末尾添加标记完成确认和写入已完成课程的函数
+        function completeCourseConfirm(courseId) {
+            const course = scheduleData.find(c => c.id === courseId);
+            if (!course) return;
+            if (confirm(`是否完成课程？\n\n学员：${course.studentName}\n科目：${course.subject}\n时间：${getDayName(course.day)} ${course.time}`)) {
+                // 计算薪资
+                let salary = 0;
+                let grade = '';
+                if (window.studentMap && window.studentMap[course.studentName]) {
+                    grade = window.studentMap[course.studentName].grade || '';
+                } else {
+                    grade = course.grade || '';
+                }
+                const hours = course.duration / 60;
+                if (course.type === 'trial') {
+                    salary = 39.9;
+                } else if (course.type === 'converted') {
+                    salary = 99.9;
+                } else if (course.type === 'formal') {
+                    let hourlyRate = 50;
+                    switch (grade) {
+                        case '小学': hourlyRate = 40; break;
+                        case '初中': hourlyRate = 50; break;
+                        case '高中': hourlyRate = 60; break;
+                    }
+                    salary = (hourlyRate * hours);
+                }
+                // 写入已完成课程
+                const completedCourse = {
+                    ...course,
+                    completedTime: new Date().toLocaleString('zh-CN'),
+                    status: 'completed',
+                    salary: salary.toFixed(1),
+                    grade: grade,
+                    phone: course.phone || (window.studentMap && window.studentMap[course.studentName] ? window.studentMap[course.studentName].phone : '')
+                };
+                firebase.database().ref('completed').push(completedCourse);
+                // 从schedule中删除
+                firebase.database().ref('schedule/' + courseId).remove();
+                showNotification('课程已标记为完成！', 'success');
+            }
+        }
     </script>
 </body>
 </html> 
