@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>最小测试</title>
+</head>
+<body>
+    <h1>最小测试页面</h1>
+    <p>如果您能看到这个页面，说明服务器工作正常。</p>
+    <button onclick="testClick()">点击测试</button>
+    <div id="result"></div>
+
+    <script>
+        function testClick() {
+            document.getElementById('result').innerHTML = '按钮点击成功！时间：' + new Date().toLocaleString();
+        }
+    </script>
+</body>
+</html> 

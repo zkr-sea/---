@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>万校互联教练管理系统</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .auth-locked {
+            overflow: hidden;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #6c757d;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .auth-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-form {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .auth-error {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+        .toggle-link {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录/注册界面 -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-form">
+            <h2 id="auth-title" class="text-2xl font-bold text-center mb-8 text-gray-800">登录</h2>
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="auth-phone">手机号</label>
+                    <input type="tel" id="auth-phone" name="phone" placeholder="请输入11位手机号" maxlength="11" required>
+                </div>
+                <div class="form-group">
+                    <label for="auth-password">密码</label>
+                    <input type="password" id="auth-password" name="password" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" id="auth-submit" class="btn-primary w-full mb-4">登录</button>
+                <div id="auth-error" class="auth-error"></div>
+            </form>
+            <p class="text-center text-gray-600">
+                <span id="auth-toggle-text">没有账号？</span>
+                <span id="auth-toggle-link" class="toggle-link">注册</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="main-content" class="min-h-screen">
+        <!-- 用户信息栏 -->
+        <div id="navbar-user-bar" class="bg-white shadow-sm border-b border-gray-200 px-6 py-3 flex justify-between items-center" style="display: none;">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-xl font-semibold text-gray-800">万校互联教练管理系统</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-600">欢迎，<span id="user-phone" class="font-medium"></span></span>
+                <button id="navbar-logout-btn" class="btn-secondary">退出登录</button>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <nav id="main-navbar" class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4" style="display: none;">
+            <div class="flex space-x-4">
+                <button class="nav-btn bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg font-medium" data-tab="dashboard">仪表盘</button>
+                <button class="nav-btn text-white px-4 py-2 rounded-lg font-medium" data-tab="students">学生管理</button>
+                <button class="nav-btn text-white px-4 py-2 rounded-lg font-medium" data-tab="courses">课程安排</button>
+                <button class="nav-btn text-white px-4 py-2 rounded-lg font-medium" data-tab="completed">已完成课程</button>
+                <button class="nav-btn text-white px-4 py-2 rounded-lg font-medium" data-tab="feedback">AI反馈</button>
+            </div>
+        </nav>
+
+        <!-- 内容区域 -->
+        <div class="p-6">
+            <!-- 仪表盘 -->
+            <div id="dashboard-content" class="tab-content active">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">仪表盘</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-2">总学生数</h3>
+                        <p class="text-3xl font-bold text-blue-600" id="total-students">0</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-2">今日课程</h3>
+                        <p class="text-3xl font-bold text-green-600" id="today-courses">0</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-2">本月反馈</h3>
+                        <p class="text-3xl font-bold text-purple-600" id="month-feedback">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 学生管理 -->
+            <div id="students-content" class="tab-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">学生管理</h2>
+                    <button onclick="openAddStudentModal()" class="btn-primary">添加学生</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4">试听学生</h3>
+                        <div id="trial-students" class="space-y-4"></div>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-lg font-semibold mb-4">正式学生</h3>
+                        <div id="formal-students" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 课程安排 -->
+            <div id="courses-content" class="tab-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">课程安排</h2>
+                    <button onclick="openAddCourseModal()" class="btn-primary">添加课程</button>
+                </div>
+                <div id="course-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- 已完成课程 -->
+            <div id="completed-content" class="tab-content">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">已完成课程</h2>
+                <div id="completed-course-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- AI反馈 -->
+            <div id="feedback-content" class="tab-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">AI反馈</h2>
+                    <button onclick="openAddFeedbackModal()" class="btn-primary">添加反馈</button>
+                </div>
+                <div id="feedback-list" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxGgOeRzcUn28qJa1KJnht8o3QjvW7qQk",
+            authDomain: "coach-system-8f0d7.firebaseapp.com",
+            databaseURL: "https://coach-system-8f0d7-default-rtdb.firebaseio.com",
+            projectId: "coach-system-8f0d7",
+            storageBucket: "coach-system-8f0d7.appspot.com",
+            messagingSenderId: "1062284200459",
+            appId: "1:1062284200459:web:8f0d7c8c8c8c8c8c8c8c8c"
+        };
+
+        // 初始化Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // 全局变量
+        let isLogin = true;
+        let authTitle, authSubmit, authToggleText, authToggleLink, authError;
+
+        // 初始化登录表单
+        function initializeAuthForm() {
+            authTitle = document.getElementById('auth-title');
+            authSubmit = document.getElementById('auth-submit');
+            authToggleText = document.getElementById('auth-toggle-text');
+            authToggleLink = document.getElementById('auth-toggle-link');
+            authError = document.getElementById('auth-error');
+            
+            // 绑定表单提交事件
+            const authForm = document.getElementById('auth-form');
+            if (authForm) {
+                authForm.onsubmit = handleAuthSubmit;
+            }
+            
+            // 绑定切换登录/注册事件
+            if (authToggleLink) {
+                authToggleLink.onclick = toggleAuthMode;
+            }
+        }
+
+        // 处理登录/注册提交
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            console.log('表单提交事件触发');
+            
+            if (!authError) return;
+            authError.style.display = 'none';
+            
+            const phone = document.getElementById('auth-phone').value.trim();
+            const password = document.getElementById('auth-password').value;
+            
+            console.log('输入手机号:', phone, '输入密码:', password);
+            
+            if (!/^\d{11}$/.test(phone)) {
+                showAuthError('请输入11位手机号');
+                return;
+            }
+            
+            if (!password || password.length < 6) {
+                showAuthError('密码至少6位');
+                return;
+            }
+            
+            try {
+                // 显示加载状态
+                const submitBtn = document.getElementById('auth-submit');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = isLogin ? '登录中...' : '注册中...';
+                submitBtn.disabled = true;
+                
+                if (isLogin) {
+                    // 登录逻辑
+                    await handleLogin(phone, password);
+                } else {
+                    // 注册逻辑
+                    await handleRegister(phone, password);
+                }
+                
+                // 恢复按钮状态
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+            } catch (err) {
+                console.error('登录/注册出错：', err);
+                showAuthError(err.message);
+                
+                // 恢复按钮状态
+                const submitBtn = document.getElementById('auth-submit');
+                submitBtn.textContent = isLogin ? '登录' : '注册';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // 处理登录
+        async function handleLogin(phone, password) {
+            const snap = await firebase.database().ref('users/' + phone).once('value');
+            const user = snap.val();
+            console.log('查到的用户：', user);
+            
+            if (!user) {
+                throw new Error('用户不存在，请先注册');
+            }
+            
+            if (user.password !== password) {
+                throw new Error('密码错误');
+            }
+            
+            // 登录成功
+            localStorage.setItem('loginPhone', phone);
+            console.log('登录成功，进入主页面');
+            showMainContent(phone);
+            showNotification('登录成功！', 'success');
+        }
+
+        // 处理注册
+        async function handleRegister(phone, password) {
+            const snap = await firebase.database().ref('users/' + phone).once('value');
+            if (snap.exists()) {
+                throw new Error('手机号已注册，请直接登录');
+            }
+            
+            await firebase.database().ref('users/' + phone).set({
+                phone,
+                password,
+                createdAt: new Date().toISOString()
+            });
+            
+            // 注册成功
+            localStorage.setItem('loginPhone', phone);
+            console.log('注册成功，进入主页面');
+            showMainContent(phone);
+            showNotification('注册成功！', 'success');
+        }
+
+        // 显示认证错误
+        function showAuthError(message) {
+            if (authError) {
+                authError.textContent = message;
+                authError.style.display = 'block';
+            }
+        }
+
+        // 切换登录/注册模式
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isLogin = !isLogin;
+            
+            if (isLogin) {
+                authTitle.textContent = '登录';
+                authSubmit.textContent = '登录';
+                authToggleText.textContent = '没有账号？';
+                authToggleLink.textContent = '注册';
+            } else {
+                authTitle.textContent = '注册';
+                authSubmit.textContent = '注册';
+                authToggleText.textContent = '已有账号？';
+                authToggleLink.textContent = '登录';
+            }
+            
+            // 清空错误信息
+            if (authError) {
+                authError.style.display = 'none';
+            }
+            
+            // 清空表单
+            document.getElementById('auth-phone').value = '';
+            document.getElementById('auth-password').value = '';
+        }
+
+        // 显示主界面内容
+        function showMainContent(phone) {
+            console.log('显示主界面，用户手机号:', phone);
+            
+            // 隐藏登录界面
+            document.getElementById('auth-container').style.display = 'none';
+            document.body.classList.remove('auth-locked');
+            
+            // 显示导航栏和用户栏
+            document.getElementById('navbar-user-bar').style.display = 'flex';
+            document.getElementById('main-navbar').style.display = 'flex';
+            
+            // 设置用户信息
+            const userPhoneSpan = document.getElementById('user-phone');
+            if (userPhoneSpan) {
+                userPhoneSpan.textContent = phone;
+            }
+            
+            // 绑定退出登录事件
+            bindLogoutEvents();
+            
+            // 默认显示仪表盘
+            showTab('dashboard');
+            
+            // 初始化数据监听
+            initializeDataListeners(phone);
+        }
+
+        // 绑定退出登录事件
+        function bindLogoutEvents() {
+            const navbarLogoutBtn = document.getElementById('navbar-logout-btn');
+            if (navbarLogoutBtn) {
+                navbarLogoutBtn.onclick = logout;
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('loginPhone');
+            document.getElementById('auth-container').style.display = 'flex';
+            document.getElementById('navbar-user-bar').style.display = 'none';
+            document.getElementById('main-navbar').style.display = 'none';
+            document.body.classList.add('auth-locked');
+        }
+
+        // 显示标签页内容
+        function showTab(tabName) {
+            // 隐藏所有内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有导航按钮的激活状态
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'bg-opacity-20');
+            });
+            
+            // 显示选中的内容
+            const selectedContent = document.getElementById(tabName + '-content');
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            }
+            
+            // 激活对应的导航按钮
+            const selectedBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('bg-white', 'bg-opacity-20');
+            }
+        }
+
+        // 绑定导航按钮事件
+        function bindNavigationEvents() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    showTab(tabName);
+                });
+            });
+        }
+
+        // 初始化数据监听器
+        function initializeDataListeners(phone) {
+            console.log('初始化数据监听器，用户:', phone);
+            
+            // 监听学生数据
+            firebase.database().ref('students').on('value', function(snapshot) {
+                const students = [];
+                snapshot.forEach(function(childSnapshot) {
+                    const student = childSnapshot.val();
+                    student.firebaseKey = childSnapshot.key;
+                    students.push(student);
+                });
+                window.students = students;
+                renderStudentList();
+            });
+            
+            // 监听课程数据
+            firebase.database().ref('courses').on('value', function(snapshot) {
+                const courses = [];
+                snapshot.forEach(function(childSnapshot) {
+                    const course = childSnapshot.val();
+                    course.firebaseKey = childSnapshot.key;
+                    courses.push(course);
+                });
+                window.courses = courses;
+                renderCourseList();
+            });
+            
+            // 监听反馈数据
+            firebase.database().ref('feedback').on('value', function(snapshot) {
+                const feedback = [];
+                snapshot.forEach(function(childSnapshot) {
+                    const fb = childSnapshot.val();
+                    fb.firebaseKey = childSnapshot.key;
+                    feedback.push(fb);
+                });
+                window.feedbackData = feedback;
+                renderFeedbackList();
+            });
+        }
+
+        // 渲染学生列表
+        function renderStudentList() {
+            try {
+                const students = window.students || [];
+                const trialContainer = document.getElementById('trial-students');
+                const formalContainer = document.getElementById('formal-students');
+                
+                if (!trialContainer || !formalContainer) {
+                    console.log('学生容器未找到，跳过渲染');
+                    return;
+                }
+                
+                trialContainer.innerHTML = '';
+                formalContainer.innerHTML = '';
+                
+                students.forEach(student => {
+                    const card = createStudentCard(student);
+                    if (student.type === 'trial') {
+                        trialContainer.appendChild(card);
+                    } else {
+                        formalContainer.appendChild(card);
+                    }
+                });
+            } catch (error) {
+                console.error('渲染学生列表出错:', error);
+            }
+        }
+
+        // 渲染课程列表
+        function renderCourseList() {
+            try {
+                const courses = window.courses || [];
+                const courseList = document.getElementById('course-list');
+                
+                if (!courseList) {
+                    console.log('课程列表容器未找到，跳过渲染');
+                    return;
+                }
+                
+                courseList.innerHTML = '';
+                
+                courses.forEach(course => {
+                    const card = createCourseCard(course);
+                    courseList.appendChild(card);
+                });
+            } catch (error) {
+                console.error('渲染课程列表出错:', error);
+            }
+        }
+
+        // 渲染反馈列表
+        function renderFeedbackList() {
+            try {
+                const feedbackData = window.feedbackData || [];
+                const feedbackList = document.getElementById('feedback-list');
+                
+                if (!feedbackList) {
+                    console.log('反馈列表容器未找到，跳过渲染');
+                    return;
+                }
+                
+                feedbackList.innerHTML = '';
+                
+                feedbackData.forEach(feedback => {
+                    const card = document.createElement('div');
+                    card.className = 'card mb-4';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${feedback.studentName}</h3>
+                                <p class="text-sm text-gray-600">${feedback.date}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="viewFeedbackDetail('${feedback.firebaseKey}')" class="btn-secondary text-sm">查看详情</button>
+                                <button onclick="deleteFeedback('${feedback.firebaseKey}')" class="btn-secondary text-sm text-red-600">删除</button>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-700">
+                            <p><strong>学习内容：</strong>${feedback.learningContent || ''}</p>
+                            <p><strong>反馈内容：</strong>${feedback.content || ''}</p>
+                        </div>
+                    `;
+                    feedbackList.appendChild(card);
+                });
+            } catch (error) {
+                console.error('渲染反馈列表出错:', error);
+            }
+        }
+
+        // 创建学生卡片
+        function createStudentCard(student) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">${student.name}</h3>
+                        <p class="text-sm text-gray-600">${student.phone}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="deleteStudent('${student.firebaseKey}')" class="btn-secondary text-sm text-red-600">删除</button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // 创建课程卡片
+        function createCourseCard(course) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">${course.studentName}</h3>
+                        <p class="text-sm text-gray-600">${course.date} ${course.time}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="completeCourse('${course.firebaseKey}')" class="btn-secondary text-sm">完成</button>
+                        <button onclick="deleteCourse('${course.firebaseKey}')" class="btn-secondary text-sm text-red-600">删除</button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // 删除学生
+        function deleteStudent(firebaseKey) {
+            if (confirm('确定要删除这个学生吗？')) {
+                firebase.database().ref('students/' + firebaseKey).remove();
+                showNotification('学生已删除', 'success');
+            }
+        }
+
+        // 删除课程
+        function deleteCourse(firebaseKey) {
+            if (confirm('确定要删除这个课程吗？')) {
+                firebase.database().ref('courses/' + firebaseKey).remove();
+                showNotification('课程已删除', 'success');
+            }
+        }
+
+        // 完成课程
+        function completeCourse(firebaseKey) {
+            if (confirm('确定要标记这个课程为已完成吗？')) {
+                firebase.database().ref('courses/' + firebaseKey).update({
+                    completed: true,
+                    completedAt: new Date().toISOString()
+                });
+                showNotification('课程已标记为完成', 'success');
+            }
+        }
+
+        // 删除反馈
+        function deleteFeedback(firebaseKey) {
+            if (confirm('确定要删除这条反馈吗？')) {
+                firebase.database().ref('feedback/' + firebaseKey).remove();
+                showNotification('反馈已删除', 'success');
+            }
+        }
+
+        // 显示通知消息
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                warning: 'bg-yellow-500 text-white',
+                info: 'bg-blue-500 text-white'
+            };
+            
+            notification.className += ` ${colors[type] || colors.info}`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}" class="w-5 h-5"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            lucide.createIcons();
+            
+            // 显示动画
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面开始初始化...');
+            
+            try {
+                // 初始化登录表单
+                initializeAuthForm();
+                console.log('登录表单初始化完成');
+                
+                // 绑定导航事件
+                bindNavigationEvents();
+                console.log('导航事件绑定完成');
+                
+                // 初始化图标
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                    console.log('图标初始化完成');
+                }
+                
+                // 检查登录状态
+                const phone = localStorage.getItem('loginPhone');
+                if (phone) {
+                    console.log('检测到登录状态，显示主界面');
+                    showMainContent(phone);
+                } else {
+                    console.log('未检测到登录状态，显示登录界面');
+                    document.getElementById('auth-container').style.display = 'flex';
+                    document.getElementById('navbar-user-bar').style.display = 'none';
+                    document.getElementById('main-navbar').style.display = 'none';
+                    document.body.classList.add('auth-locked');
+                }
+                
+                console.log('页面初始化完成');
+            } catch (error) {
+                console.error('页面初始化出错:', error);
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>万校互联教练系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .card {
+            @apply bg-white rounded-lg shadow-md border border-gray-200 p-6;
+        }
+        .btn-primary {
+            @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+        }
+        .btn-secondary {
+            @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+        }
+        .input-field {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+    <!-- Firebase App (核心) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Firebase Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCECwMZOu2iMfmm4wMAWwMdDEjW8Pu3Bdg",
+            authDomain: "waanxiaohulian.firebaseapp.com",
+            databaseURL: "https://waanxiaohulian-default-rtdb.firebaseio.com",
+            projectId: "waanxiaohulian",
+            storageBucket: "waanxiaohulian.firebasestorage.app",
+            messagingSenderId: "793340262715",
+            appId: "1:793340262715:web:f67e9879b7ee05a2d15f1e",
+            measurementId: "G-11Z6XV1QF2"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 登录/注册界面 -->
+    <div id="auth-container" class="min-h-screen flex items-center justify-center gradient-bg relative overflow-hidden">
+        <!-- 背景装饰 -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-white opacity-10 rounded-full floating-animation"></div>
+            <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-white opacity-10 rounded-full floating-animation" style="animation-delay: -3s;"></div>
+            <div class="absolute top-1/2 left-1/4 w-20 h-20 bg-white opacity-20 rounded-full pulse-animation"></div>
+            <div class="absolute top-1/3 right-1/3 w-16 h-16 bg-white opacity-15 rounded-full pulse-animation" style="animation-delay: -1s;"></div>
+        </div>
+        
+        <div class="relative z-10 glass-effect rounded-2xl p-8 shadow-2xl max-w-md w-full mx-4">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+                    <i data-lucide="graduation-cap" class="w-10 h-10 text-blue-600"></i>
+                </div>
+                <h2 id="auth-title" class="text-3xl font-bold text-white mb-2">万校互联教练系统</h2>
+                <p class="text-white opacity-80">智能化的教练管理平台</p>
+            </div>
+            
+            <form id="auth-form" class="space-y-6">
+                <div class="relative">
+                    <i data-lucide="smartphone" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input id="auth-phone" type="tel" pattern="[0-9]{11}" placeholder="请输入手机号" required 
+                           class="w-full pl-10 pr-4 py-3 bg-white bg-opacity-90 rounded-lg border-0 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200">
+                </div>
+                
+                <div class="relative">
+                    <i data-lucide="lock" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input id="auth-password" type="password" placeholder="请输入密码" required 
+                           class="w-full pl-10 pr-4 py-3 bg-white bg-opacity-90 rounded-lg border-0 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200">
+                </div>
+                
+                <button id="auth-submit" type="submit" 
+                        class="w-full bg-white text-blue-600 font-semibold py-3 rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105">
+                    登录
+                </button>
+            </form>
+            
+            <div class="text-center mt-6">
+                <span id="auth-toggle-text" class="text-white opacity-80">没有账号？</span>
+                <a href="#" id="auth-toggle-link" class="text-white font-semibold hover:underline ml-2">注册</a>
+            </div>
+            
+            <div id="auth-error" class="mt-4 p-3 bg-red-500 bg-opacity-20 border border-red-300 rounded-lg text-red-100 text-center hidden"></div>
+        </div>
+    </div>
+    
+    <!-- 顶部导航栏（登录后显示） -->
+    <nav id="main-navbar" style="display:none;" class="sticky top-0 z-40 gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-8">
+                    <div class="flex items-center space-x-3">
+                        <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+                        <span class="font-bold text-xl">万校互联教练系统</span>
+                    </div>
+                    <div class="hidden md:flex space-x-1">
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="dashboard">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 inline mr-2"></i>仪表盘
+                        </button>
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="students">
+                            <i data-lucide="users" class="w-4 h-4 inline mr-2"></i>学生管理
+                        </button>
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="schedule">
+                            <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>课程安排
+                        </button>
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="completed">
+                            <i data-lucide="check-circle" class="w-4 h-4 inline mr-2"></i>已完成课程
+                        </button>
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="feedback">
+                            <i data-lucide="message-square" class="w-4 h-4 inline mr-2"></i>AI反馈
+                        </button>
+                    </div>
+                </div>
+                <div id="navbar-user-bar" style="display:none;" class="flex items-center space-x-4">
+                    <span id="navbar-user-phone" class="text-white font-medium"></span>
+                    <button id="navbar-logout-btn" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg hover:bg-opacity-30 transition-all duration-200">
+                        <i data-lucide="log-out" class="w-4 h-4 inline mr-2"></i>退出登录
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 内容区域 -->
+        <div id="content">
+            <!-- 仪表板 -->
+            <div id="dashboard-content" class="tab-content active">
+                <div class="space-y-8">
+                    <!-- 欢迎横幅 -->
+                    <div class="gradient-bg rounded-2xl p-8 text-white relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                                    <i data-lucide="sun" class="w-8 h-8"></i>
+                                </div>
+                                <div>
+                                    <h1 class="text-3xl font-bold">欢迎回来！</h1>
+                                    <p class="text-white opacity-90">今天是美好的一天，让我们开始工作吧</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="calendar" class="w-6 h-6"></i>
+                                        <span class="font-semibold">今日课程</span>
+                                    </div>
+                                    <p class="text-2xl font-bold mt-2" id="today-courses">0</p>
+                                </div>
+                                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="trending-up" class="w-6 h-6"></i>
+                                        <span class="font-semibold">本月收入</span>
+                                    </div>
+                                    <p class="text-2xl font-bold mt-2" id="monthly-income">¥0</p>
+                                </div>
+                                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="star" class="w-6 h-6"></i>
+                                        <span class="font-semibold">完成率</span>
+                                    </div>
+                                    <p class="text-2xl font-bold mt-2" id="completion-rate">0%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 统计卡片 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                                    <i data-lucide="users" class="w-6 h-6"></i>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-sm font-medium text-gray-600">总学生数</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="total-students">0</p>
+                                    <p class="text-sm text-gray-500 mt-1">本月新增</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white">
+                                    <i data-lucide="user-check" class="w-6 h-6"></i>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-sm font-medium text-gray-600">正式学员</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="formal-students-count">0</p>
+                                    <p class="text-sm text-gray-500 mt-1">稳定学员</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
+                                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-sm font-medium text-gray-600">试课学员</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="trial-students-count">0</p>
+                                    <p class="text-sm text-gray-500 mt-1">潜在学员</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+                                    <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-sm font-medium text-gray-600">总收入</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="total-income">¥0</p>
+                                    <p class="text-sm text-gray-500 mt-1">累计收入</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 学生管理 -->
+            <div id="students-content" class="tab-content">
+                <div class="space-y-8">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900">学生管理</h2>
+                            <p class="text-gray-600 mt-2">管理所有学员信息，包括正式学员和试课学员</p>
+                        </div>
+                        <button onclick="showAddStudentModal()" class="btn-primary flex items-center space-x-2 hover:scale-105 transition-transform">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>添加学生</span>
+                        </button>
+                    </div>
+                    
+                    <!-- 快速统计 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-100">正式学员</p>
+                                    <p class="text-3xl font-bold" id="formal-count">0</p>
+                                </div>
+                                <i data-lucide="user-check" class="w-12 h-12 opacity-80"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-yellow-100">试课学员</p>
+                                    <p class="text-3xl font-bold" id="trial-count">0</p>
+                                </div>
+                                <i data-lucide="book-open" class="w-12 h-12 opacity-80"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-100">本月新增</p>
+                                    <p class="text-3xl font-bold" id="new-count">0</p>
+                                </div>
+                                <i data-lucide="trending-up" class="w-12 h-12 opacity-80"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4 mb-6">
+                        <div class="flex-1 relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                            <input type="text" placeholder="搜索学生姓名..." class="input-field pl-10" onkeyup="filterStudents(this.value)">
+                        </div>
+                        <select class="input-field w-48" onchange="filterBySubject(this.value)">
+                            <option value="">所有科目</option>
+                            <option value="语文">语文</option>
+                            <option value="数学">数学</option>
+                            <option value="英语">英语</option>
+                            <option value="物理">物理</option>
+                        </select>
+                    </div>
+
+                    <!-- 正式成员 -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="users" class="w-5 h-5 text-green-600"></i>
+                            正式成员
+                        </h3>
+                        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="formal-students">
+                            <!-- 正式学员列表会动态生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 试课成员 -->
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="book-open" class="w-5 h-5 text-yellow-600"></i>
+                            试课成员
+                        </h3>
+                        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="trial-students">
+                            <!-- 试课成员列表会动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 其他内容区域 -->
+            <div id="schedule-content" class="tab-content">
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-900">课程安排</h2>
+                    <p class="text-gray-600">课程安排功能正在开发中...</p>
+                </div>
+            </div>
+
+            <div id="completed-content" class="tab-content">
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-900">已完成课程</h2>
+                    <p class="text-gray-600">已完成课程功能正在开发中...</p>
+                </div>
+            </div>
+
+            <div id="feedback-content" class="tab-content">
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-900">AI反馈</h2>
+                    <p class="text-gray-600">AI反馈功能正在开发中...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 登录/注册相关变量
+        let isLogin = true;
+        let authTitle, authSubmit, authToggleText, authToggleLink, authError;
+
+        // 初始化登录表单
+        function initializeAuthForm() {
+            authTitle = document.getElementById('auth-title');
+            authSubmit = document.getElementById('auth-submit');
+            authToggleText = document.getElementById('auth-toggle-text');
+            authToggleLink = document.getElementById('auth-toggle-link');
+            authError = document.getElementById('auth-error');
+            
+            // 绑定表单提交事件
+            const authForm = document.getElementById('auth-form');
+            if (authForm) {
+                authForm.onsubmit = handleAuthSubmit;
+            }
+            
+            // 绑定切换登录/注册事件
+            if (authToggleLink) {
+                authToggleLink.onclick = toggleAuthMode;
+            }
+        }
+
+        // 处理登录/注册提交
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            console.log('表单提交事件触发');
+            
+            if (!authError) return;
+            authError.style.display = 'none';
+            
+            const phone = document.getElementById('auth-phone').value.trim();
+            const password = document.getElementById('auth-password').value;
+            
+            console.log('输入手机号:', phone, '输入密码:', password);
+            
+            if (!/^\d{11}$/.test(phone)) {
+                showAuthError('请输入11位手机号');
+                return;
+            }
+            
+            if (!password || password.length < 6) {
+                showAuthError('密码至少6位');
+                return;
+            }
+            
+            try {
+                // 显示加载状态
+                const submitBtn = document.getElementById('auth-submit');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = isLogin ? '登录中...' : '注册中...';
+                submitBtn.disabled = true;
+                
+                if (isLogin) {
+                    // 登录逻辑
+                    await handleLogin(phone, password);
+                } else {
+                    // 注册逻辑
+                    await handleRegister(phone, password);
+                }
+                
+                // 恢复按钮状态
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+            } catch (err) {
+                console.error('登录/注册出错：', err);
+                showAuthError(err.message);
+                
+                // 恢复按钮状态
+                const submitBtn = document.getElementById('auth-submit');
+                submitBtn.textContent = isLogin ? '登录' : '注册';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // 处理登录
+        async function handleLogin(phone, password) {
+            const snap = await firebase.database().ref('users/' + phone).once('value');
+            const user = snap.val();
+            console.log('查到的用户：', user);
+            
+            if (!user) {
+                throw new Error('用户不存在，请先注册');
+            }
+            
+            if (user.password !== password) {
+                throw new Error('密码错误');
+            }
+            
+            // 登录成功
+            localStorage.setItem('loginPhone', phone);
+            console.log('登录成功，进入主页面');
+            showMainContent(phone);
+            showNotification('登录成功！', 'success');
+        }
+
+        // 处理注册
+        async function handleRegister(phone, password) {
+            const snap = await firebase.database().ref('users/' + phone).once('value');
+            if (snap.exists()) {
+                throw new Error('手机号已注册，请直接登录');
+            }
+            
+            await firebase.database().ref('users/' + phone).set({
+                phone,
+                password,
+                createdAt: new Date().toISOString()
+            });
+            
+            // 注册成功
+            localStorage.setItem('loginPhone', phone);
+            console.log('注册成功，进入主页面');
+            showMainContent(phone);
+            showNotification('注册成功！', 'success');
+        }
+
+        // 显示认证错误
+        function showAuthError(message) {
+            if (authError) {
+                authError.textContent = message;
+                authError.style.display = 'block';
+                authError.classList.remove('hidden');
+            }
+        }
+
+        // 切换登录/注册模式
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isLogin = !isLogin;
+            
+            if (isLogin) {
+                authTitle.textContent = '登录';
+                authSubmit.textContent = '登录';
+                authToggleText.textContent = '没有账号？';
+                authToggleLink.textContent = '注册';
+            } else {
+                authTitle.textContent = '注册';
+                authSubmit.textContent = '注册';
+                authToggleText.textContent = '已有账号？';
+                authToggleLink.textContent = '登录';
+            }
+            
+            // 清空错误信息
+            if (authError) {
+                authError.style.display = 'none';
+            }
+            
+            // 清空表单
+            document.getElementById('auth-phone').value = '';
+            document.getElementById('auth-password').value = '';
+        }
+
+        // 登录后显示导航栏和默认tab
+        function showMainContent(phone) {
+            try {
+                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('navbar-user-bar').style.display = 'flex';
+                document.getElementById('navbar-user-phone').textContent = phone;
+                document.getElementById('main-navbar').style.display = '';
+                document.body.classList.remove('auth-locked');
+                
+                // 确保所有内容区域隐藏，然后显示仪表板
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // 显示仪表板
+                const dashboardContent = document.getElementById('dashboard-content');
+                if (dashboardContent) {
+                    dashboardContent.style.display = 'block';
+                }
+                
+                // 激活仪表板导航按钮
+                const dashboardBtn = document.querySelector('[data-tab="dashboard"]');
+                if (dashboardBtn) {
+                    dashboardBtn.classList.add('bg-white', 'bg-opacity-20');
+                }
+                
+                console.log('主界面显示成功');
+            } catch (error) {
+                console.error('显示主界面出错:', error);
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('loginPhone');
+            document.getElementById('auth-container').style.display = 'flex';
+            document.getElementById('navbar-user-bar').style.display = 'none';
+            document.getElementById('main-navbar').style.display = 'none';
+            document.body.classList.add('auth-locked');
+        }
+
+        // 显示通知消息
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                warning: 'bg-yellow-500 text-white',
+                info: 'bg-blue-500 text-white'
+            };
+            
+            notification.className += ` ${colors[type] || colors.info}`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}" class="w-5 h-5"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            lucide.createIcons();
+            
+            // 显示动画
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 显示标签页内容
+        function showTab(tabName) {
+            // 隐藏所有内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // 移除所有导航按钮的激活状态
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'bg-opacity-20');
+            });
+            
+            // 显示选中的内容
+            const selectedContent = document.getElementById(tabName + '-content');
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            }
+            
+            // 激活对应的导航按钮
+            const selectedBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('bg-white', 'bg-opacity-20');
+            }
+        }
+
+        // 绑定导航按钮事件
+        function bindNavigationEvents() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    showTab(tabName);
+                });
+            });
+        }
+
+        // 绑定退出登录事件
+        function bindLogoutEvents() {
+            const navbarLogoutBtn = document.getElementById('navbar-logout-btn');
+            if (navbarLogoutBtn) {
+                navbarLogoutBtn.onclick = logout;
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化登录表单
+            initializeAuthForm();
+            
+            // 绑定导航事件
+            bindNavigationEvents();
+            
+            // 绑定退出登录事件
+            bindLogoutEvents();
+            
+            // 初始化图标
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            // 检查登录状态
+            const phone = localStorage.getItem('loginPhone');
+            if (phone) {
+                showMainContent(phone);
+            } else {
+                document.getElementById('auth-container').style.display = 'flex';
+                document.getElementById('navbar-user-bar').style.display = 'none';
+                document.getElementById('main-navbar').style.display = 'none';
+                document.body.classList.add('auth-locked');
+            }
+            
+            console.log('页面初始化完成');
+        });
+    </script>
+</body>
+</html> 

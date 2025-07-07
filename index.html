@@ -20,6 +20,28 @@
         .input-field {
             @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
         }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
     </style>
     <!-- Firebase App (核心) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -44,41 +66,91 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- 登录/注册界面 -->
-    <div id="auth-container" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc;position:fixed;z-index:100;width:100vw;height:100vh;top:0;left:0;">
-      <div style="background:white;padding:2.5rem 2rem;border-radius:1rem;box-shadow:0 4px 32px #0001;min-width:320px;max-width:90vw;">
-        <h2 id="auth-title" style="font-size:1.5rem;font-weight:600;text-align:center;margin-bottom:1.5rem;color:#2563eb;">登录</h2>
-        <form id="auth-form">
-          <input id="auth-phone" type="tel" pattern="[0-9]{11}" placeholder="手机号" required style="width:100%;margin-bottom:1rem;padding:0.75rem;border-radius:0.5rem;border:1px solid #d1d5db;outline:none;font-size:1rem;">
-          <input id="auth-password" type="password" placeholder="密码" required style="width:100%;margin-bottom:1.5rem;padding:0.75rem;border-radius:0.5rem;border:1px solid #d1d5db;outline:none;font-size:1rem;">
-          <button id="auth-submit" type="submit" style="width:100%;background:#2563eb;color:white;font-weight:600;padding:0.75rem;border:none;border-radius:0.5rem;font-size:1rem;">登录</button>
-        </form>
-        <div style="text-align:center;margin-top:1rem;">
-          <span id="auth-toggle-text">没有账号？</span>
-          <a href="#" id="auth-toggle-link" style="color:#2563eb;text-decoration:underline;">注册</a>
+    <div id="auth-container" class="min-h-screen flex items-center justify-center gradient-bg relative overflow-hidden">
+        <!-- 背景装饰 -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-white opacity-10 rounded-full floating-animation"></div>
+            <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-white opacity-10 rounded-full floating-animation" style="animation-delay: -3s;"></div>
+            <div class="absolute top-1/2 left-1/4 w-20 h-20 bg-white opacity-20 rounded-full pulse-animation"></div>
+            <div class="absolute top-1/3 right-1/3 w-16 h-16 bg-white opacity-15 rounded-full pulse-animation" style="animation-delay: -1s;"></div>
         </div>
-        <div id="auth-error" style="color:#ef4444;text-align:center;margin-top:1rem;display:none;"></div>
-      </div>
+        
+        <div class="relative z-10 glass-effect rounded-2xl p-8 shadow-2xl max-w-md w-full mx-4">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+                    <i data-lucide="graduation-cap" class="w-10 h-10 text-blue-600"></i>
+                </div>
+                <h2 id="auth-title" class="text-3xl font-bold text-white mb-2">万校互联教练系统</h2>
+                <p class="text-white opacity-80">智能化的教练管理平台</p>
+            </div>
+            
+            <form id="auth-form" class="space-y-6">
+                <div class="relative">
+                    <i data-lucide="smartphone" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input id="auth-phone" type="tel" pattern="[0-9]{11}" placeholder="请输入手机号" required 
+                           class="w-full pl-10 pr-4 py-3 bg-white bg-opacity-90 rounded-lg border-0 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200">
+                </div>
+                
+                <div class="relative">
+                    <i data-lucide="lock" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input id="auth-password" type="password" placeholder="请输入密码" required 
+                           class="w-full pl-10 pr-4 py-3 bg-white bg-opacity-90 rounded-lg border-0 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200">
+                </div>
+                
+                <button id="auth-submit" type="submit" 
+                        class="w-full bg-white text-blue-600 font-semibold py-3 rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105">
+                    登录
+                </button>
+            </form>
+            
+            <div class="text-center mt-6">
+                <span id="auth-toggle-text" class="text-white opacity-80">没有账号？</span>
+                <a href="#" id="auth-toggle-link" class="text-white font-semibold hover:underline ml-2">注册</a>
+            </div>
+            
+            <div id="auth-error" class="mt-4 p-3 bg-red-500 bg-opacity-20 border border-red-300 rounded-lg text-red-100 text-center hidden"></div>
+        </div>
     </div>
+    
     <!-- 顶部导航栏（登录后显示） -->
-    <nav id="main-navbar" style="display:none;position:sticky;top:0;z-index:40;background:#2563eb;color:#fff;box-shadow:0 2px 8px #0001;">
-      <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0.5rem 2rem;">
-        <div style="display:flex;align-items:center;gap:2rem;">
-          <span style="font-weight:700;font-size:1.2rem;letter-spacing:1px;">万校互联教练系统</span>
-          <button class="nav-btn" data-tab="dashboard" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">仪表盘</button>
-          <button class="nav-btn" data-tab="students" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">学生管理</button>
-          <button class="nav-btn" data-tab="schedule" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">课程安排</button>
-          <button class="nav-btn" data-tab="completed" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">已完成课程</button>
-          <button class="nav-btn" data-tab="feedback" style="background:none;border:none;color:inherit;font-size:1rem;padding:0.5rem 1rem;cursor:pointer;">AI反馈</button>
+    <nav id="main-navbar" style="display:none;" class="sticky top-0 z-40 gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-8">
+                    <div class="flex items-center space-x-3">
+                        <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+                        <span class="font-bold text-xl">万校互联教练系统</span>
+                    </div>
+                    <div class="hidden md:flex space-x-1">
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="dashboard">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 inline mr-2"></i>仪表盘
+                        </button>
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="students">
+                            <i data-lucide="users" class="w-4 h-4 inline mr-2"></i>学生管理
+                        </button>
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="schedule">
+                            <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>课程安排
+                        </button>
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="completed">
+                            <i data-lucide="check-circle" class="w-4 h-4 inline mr-2"></i>已完成课程
+                        </button>
+                        <button class="nav-btn px-4 py-2 rounded-lg transition-all duration-200 hover:bg-white hover:bg-opacity-20" data-tab="feedback">
+                            <i data-lucide="message-square" class="w-4 h-4 inline mr-2"></i>AI反馈
+                        </button>
+                    </div>
+                </div>
+                <div id="navbar-user-bar" style="display:none;" class="flex items-center space-x-4">
+                    <span id="navbar-user-phone" class="text-white font-medium"></span>
+                    <button id="navbar-logout-btn" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg hover:bg-opacity-30 transition-all duration-200">
+                        <i data-lucide="log-out" class="w-4 h-4 inline mr-2"></i>退出登录
+                    </button>
+                </div>
+            </div>
         </div>
-        <div id="navbar-user-bar" style="display:none;align-items:center;gap:1.2rem;">
-          <span id="navbar-user-phone" style="color:#fff;font-weight:500;font-size:1rem;padding:0 0.5rem;"></span>
-          <button id="navbar-logout-btn" style="background:transparent;color:#fff;border:1.5px solid #fff;border-radius:1.2rem;padding:0.25rem 1.2rem;font-size:1rem;cursor:pointer;transition:background 0.2s, color 0.2s;">退出登录</button>
-        </div>
-      </div>
     </nav>
 
     <script>
-              // 切换主内容区
+        // 切换主内容区
         function showTab(tab) {
           const tabIds = ['dashboard','students','schedule','completed','feedback'];
           tabIds.forEach(id => {
@@ -98,20 +170,37 @@
           };
         });
       });
-      // 登录后显示导航栏和默认tab
-      function showMainContent(phone) {
-        document.getElementById('auth-container').style.display = 'none';
-        document.getElementById('navbar-user-bar').style.display = 'flex';
-        document.getElementById('navbar-user-phone').textContent = phone;
-        document.getElementById('main-navbar').style.display = '';
-        document.body.classList.remove('auth-locked');
-        
-        // 确保所有内容区域隐藏，然后显示仪表板
-        document.querySelectorAll('.tab-content').forEach(content => {
-          content.style.display = 'none';
-        });
-        showTab('dashboard'); // 默认显示仪表盘
-      }
+              // 登录后显示导航栏和默认tab
+        function showMainContent(phone) {
+            try {
+                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('navbar-user-bar').style.display = 'flex';
+                document.getElementById('navbar-user-phone').textContent = phone;
+                document.getElementById('main-navbar').style.display = '';
+                document.body.classList.remove('auth-locked');
+                
+                // 确保所有内容区域隐藏，然后显示仪表板
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // 显示仪表板
+                const dashboardContent = document.getElementById('dashboard-content');
+                if (dashboardContent) {
+                    dashboardContent.style.display = 'block';
+                }
+                
+                // 激活仪表板导航按钮
+                const dashboardBtn = document.querySelector('[data-tab="dashboard"]');
+                if (dashboardBtn) {
+                    dashboardBtn.classList.add('bg-white', 'bg-opacity-20');
+                }
+                
+                console.log('主界面显示成功');
+            } catch (error) {
+                console.error('显示主界面出错:', error);
+            }
+        }
       // 退出登录时隐藏导航栏
       function logout() {
         localStorage.removeItem('loginPhone');
@@ -153,51 +242,100 @@
         <div id="content">
             <!-- 仪表板 -->
             <div id="dashboard-content" class="tab-content active">
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-900">仪表板</h2>
+                <div class="space-y-8">
+                    <!-- 欢迎横幅 -->
+                    <div class="gradient-bg rounded-2xl p-8 text-white relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                                    <i data-lucide="sun" class="w-8 h-8"></i>
+                                </div>
+                                <div>
+                                    <h1 class="text-3xl font-bold">欢迎回来！</h1>
+                                    <p class="text-white opacity-90">今天是美好的一天，让我们开始工作吧</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="calendar" class="w-6 h-6"></i>
+                                        <span class="font-semibold">今日课程</span>
+                                    </div>
+                                    <p class="text-2xl font-bold mt-2" id="today-courses">0</p>
+                                </div>
+                                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="trending-up" class="w-6 h-6"></i>
+                                        <span class="font-semibold">本月收入</span>
+                                    </div>
+                                    <p class="text-2xl font-bold mt-2" id="monthly-income">¥0</p>
+                                </div>
+                                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="star" class="w-6 h-6"></i>
+                                        <span class="font-semibold">完成率</span>
+                                    </div>
+                                    <p class="text-2xl font-bold mt-2" id="completion-rate">0%</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- 统计卡片 -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="card">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                             <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-blue-50 text-blue-600">
+                                <div class="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                                     <i data-lucide="users" class="w-6 h-6"></i>
                                 </div>
                                 <div class="ml-4 flex-1">
                                     <p class="text-sm font-medium text-gray-600">总学生数</p>
-                                    <p class="text-2xl font-bold text-gray-900">0</p>
-                                    <p class="text-sm text-gray-500 mt-1">暂无学生</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="total-students">0</p>
+                                    <p class="text-sm text-gray-500 mt-1">本月新增</p>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="card">
+                        <div class="card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                             <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-green-50 text-green-600">
-                                    <i data-lucide="users" class="w-6 h-6"></i>
+                                <div class="p-3 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white">
+                                    <i data-lucide="user-check" class="w-6 h-6"></i>
                                 </div>
                                 <div class="ml-4 flex-1">
                                     <p class="text-sm font-medium text-gray-600">正式学员</p>
-                                    <p class="text-2xl font-bold text-gray-900">0</p>
-                                    <p class="text-sm text-gray-500 mt-1">暂无正式学员</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="formal-students-count">0</p>
+                                    <p class="text-sm text-gray-500 mt-1">稳定学员</p>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="card">
+                        <div class="card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                             <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-yellow-50 text-yellow-600">
+                                <div class="p-3 rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
                                     <i data-lucide="book-open" class="w-6 h-6"></i>
                                 </div>
                                 <div class="ml-4 flex-1">
                                     <p class="text-sm font-medium text-gray-600">试课学员</p>
-                                    <p class="text-2xl font-bold text-gray-900">0</p>
-                                    <p class="text-sm text-gray-500 mt-1">暂无试课学员</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="trial-students-count">0</p>
+                                    <p class="text-sm text-gray-500 mt-1">潜在学员</p>
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+                                    <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-sm font-medium text-gray-600">总收入</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="total-income">¥0</p>
+                                    <p class="text-sm text-gray-500 mt-1">累计收入</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                         
                         <div class="card">
                             <div class="flex items-center">
@@ -241,13 +379,48 @@
 
             <!-- 学生管理 -->
             <div id="students-content" class="tab-content">
-                <div class="space-y-6">
+                <div class="space-y-8">
+                    <!-- 页面标题和操作 -->
                     <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-900">学生管理</h2>
-                        <button class="btn-primary flex items-center gap-2" onclick="showAddStudentModal()">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900">学生管理</h2>
+                            <p class="text-gray-600 mt-2">管理所有学员信息，包括正式学员和试课学员</p>
+                        </div>
+                        <button onclick="showAddStudentModal()" class="btn-primary flex items-center space-x-2 hover:scale-105 transition-transform">
                             <i data-lucide="plus" class="w-4 h-4"></i>
-                            添加学生
+                            <span>添加学生</span>
                         </button>
+                    </div>
+                    
+                    <!-- 快速统计 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-100">正式学员</p>
+                                    <p class="text-3xl font-bold" id="formal-count">0</p>
+                                </div>
+                                <i data-lucide="user-check" class="w-12 h-12 opacity-80"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-yellow-100">试课学员</p>
+                                    <p class="text-3xl font-bold" id="trial-count">0</p>
+                                </div>
+                                <i data-lucide="book-open" class="w-12 h-12 opacity-80"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-100">本月新增</p>
+                                    <p class="text-3xl font-bold" id="new-count">0</p>
+                                </div>
+                                <i data-lucide="trending-up" class="w-12 h-12 opacity-80"></i>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="flex gap-4 mb-6">
@@ -310,6 +483,7 @@
                                         <th class="text-left py-3 px-4 font-medium text-gray-700">完成时间</th>
                                         <th class="text-left py-3 px-4 font-medium text-gray-700">类型</th>
                                         <th class="text-left py-3 px-4 font-medium text-gray-700">薪资</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="completed-courses-list">
@@ -515,32 +689,54 @@
             const studentCard = button.closest('.student-card');
             const studentName = studentCard.getAttribute('data-name');
             const subject = studentCard.getAttribute('data-subject');
-            
-            // 确认转换
+            const grade = studentCard.getAttribute('data-grade');
+            // 优先用data-phone属性
+            let phone = studentCard.getAttribute('data-phone') || '';
+            // 如果没有，遍历p标签查找手机号
+            if (!phone) {
+                const pList = studentCard.querySelectorAll('p');
+                for (let p of pList) {
+                    if (/^1\d{10}$/.test(p.textContent.replace(/[^\d]/g, ''))) {
+                        phone = p.textContent.replace(/[^\d]/g, '');
+                        break;
+                    }
+                }
+            }
+            // 获取firebaseKey
+            let firebaseKey = studentCard.getAttribute('data-id') || studentCard.getAttribute('data-firebasekey');
+            if (!firebaseKey && window.studentMap && window.studentMap[studentName]) {
+                firebaseKey = window.studentMap[studentName].firebaseKey || window.studentMap[studentName].id;
+            }
+
             if (confirm(`确定要将 ${studentName} 从试课成员转为正式成员吗？`)) {
-                // 移除转换按钮
-                button.remove();
-                
-                // 更新状态标签
-                const statusSpan = studentCard.querySelector('span');
-                statusSpan.textContent = '正式学员';
-                statusSpan.className = 'px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                
-                // 移动到正式成员区域
+                // 构造新数据
+                const studentData = {
+                    name: studentName,
+                    subject: subject,
+                    grade: grade,
+                    phone: phone,
+                    type: 'formal'
+                };
+                // 创建新卡片
+                const newStudentCard = createStudentCard(studentData);
+                // 插入到正式成员容器
                 const formalStudentsContainer = document.getElementById('formal-students');
-                formalStudentsContainer.appendChild(studentCard);
-                
+                formalStudentsContainer.appendChild(newStudentCard);
+                // 删除原卡片
+                studentCard.parentNode.removeChild(studentCard);
+
                 // 更新学生数据映射
                 if (window.studentMap && window.studentMap[studentName]) {
                     window.studentMap[studentName].type = 'formal';
                 }
-                
+                // 更新数据库
+                if (firebaseKey) {
+                    firebase.database().ref('students/' + firebaseKey).update({ type: 'formal' });
+                }
                 // 更新仪表板统计
                 updateDashboardStats();
-                
                 // 更新课程安排模块的学生列表
                 updateScheduleStudentOptions();
-                
                 // 显示成功消息
                 showNotification(`${studentName} 已成功转为正式成员！`, 'success');
             }
@@ -583,16 +779,35 @@
                         <div class="absolute inset-0 bg-gray-500 opacity-75" onclick="closeModal()"></div>
                     </div>
                     <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">添加新学生</h3>
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-2xl font-bold text-gray-900">添加新学生</h3>
                                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                    <i data-lucide="x" class="w-6 h-6"></i>
                                 </button>
                             </div>
-                            <form onsubmit="addNewStudent(event)">
-                                <div class="space-y-4">
+                            <form onsubmit="addNewStudent(event)" class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- 学生照片上传 -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-3">学生照片</label>
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors cursor-pointer" onclick="document.getElementById('student-image-input').click()">
+                                                <img id="student-image-preview" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" alt="学生照片" class="w-24 h-24 rounded-full object-cover hidden">
+                                                <div id="upload-placeholder" class="text-center">
+                                                    <i data-lucide="camera" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                                                    <p class="text-xs text-gray-500">点击上传</p>
+                                                </div>
+                                            </div>
+                                            <input type="file" id="student-image-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                                            <div class="flex-1">
+                                                <p class="text-sm text-gray-600">上传学生照片，支持 JPG、PNG 格式</p>
+                                                <p class="text-xs text-gray-500 mt-1">建议尺寸：150x150 像素</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">学员姓名 *</label>
                                         <input type="text" name="name" required class="input-field" placeholder="请输入学员姓名">
@@ -612,12 +827,14 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">科目 *</label>
-                                        <select name="subject" required class="input-field" onchange="toggleTrialTime(this.value)">
+                                        <select name="subject" required class="input-field">
                                             <option value="">请选择科目</option>
                                             <option value="语文">语文</option>
                                             <option value="数学">数学</option>
                                             <option value="英语">英语</option>
                                             <option value="物理">物理</option>
+                                            <option value="化学">化学</option>
+                                            <option value="生物">生物</option>
                                         </select>
                                     </div>
                                     <div>
@@ -633,8 +850,11 @@
                                         <input type="datetime-local" name="trialTime" class="input-field">
                                     </div>
                                 </div>
-                                <div class="flex gap-3 mt-6">
-                                    <button type="submit" class="btn-primary flex-1">添加学生</button>
+                                <div class="flex gap-3 mt-8">
+                                    <button type="submit" class="btn-primary flex-1 flex items-center justify-center space-x-2">
+                                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                        <span>添加学生</span>
+                                    </button>
                                     <button type="button" onclick="closeModal()" class="btn-secondary flex-1">取消</button>
                                 </div>
                             </form>
@@ -660,54 +880,108 @@
             event.preventDefault();
             const formData = new FormData(event.target);
             const studentData = Object.fromEntries(formData);
+            console.log('[addNewStudent] 添加学生数据:', studentData);
             
-            // 创建学生卡片
-            const studentCard = createStudentCard(studentData);
-            
-            // 设置年级属性
-            studentCard.setAttribute('data-grade', studentData.grade);
-            
-            // 根据类型添加到对应区域
-            if (studentData.type === 'trial') {
-                document.getElementById('trial-students').appendChild(studentCard);
-            } else {
-                document.getElementById('formal-students').appendChild(studentCard);
+            // 验证必要字段
+            if (!studentData.name || !studentData.name.trim()) {
+                showNotification('请输入学员姓名', 'error');
+                return;
             }
             
-            // 更新学生数据映射
-            const studentMap = window.studentMap || {};
-            studentMap[studentData.name] = { 
-                subject: studentData.subject, 
-                type: studentData.type,
-                grade: studentData.grade 
-            };
-            window.studentMap = studentMap;
-            
-            // 更新仪表板统计
-            updateDashboardStats();
-            
-            // 更新课程安排模块的学生列表
-            updateScheduleStudentOptions();
-            
-            // 如果是试课学员，自动添加到课程安排中
-            if (studentData.type === 'trial' && studentData.trialTime) {
-                addTrialCourseToSchedule(studentData);
+            if (!studentData.phone || !studentData.phone.trim()) {
+                showNotification('请输入联系电话', 'error');
+                return;
             }
             
-            // 关闭模态框
-            closeModal();
+            if (!studentData.grade) {
+                showNotification('请选择年级', 'error');
+                return;
+            }
             
-            // 显示成功消息
-            showNotification(`学生 ${studentData.name} 添加成功！`, 'success');
+            if (!studentData.subject) {
+                showNotification('请选择科目', 'error');
+                return;
+            }
+            
+            if (!studentData.type) {
+                showNotification('请选择学员类型', 'error');
+                return;
+            }
+            
+            // 保存到Firebase
+            firebase.database().ref('students').push(studentData).then((snapshot) => {
+                console.log('[addNewStudent] 学生数据已保存到Firebase，key:', snapshot.key);
+                console.log('保存的学生数据:', studentData);
+                
+                // 创建学生卡片
+                const studentCard = createStudentCard(studentData);
+                
+                // 设置年级属性
+                studentCard.setAttribute('data-grade', studentData.grade);
+                studentCard.setAttribute('data-name', studentData.name);
+                studentCard.setAttribute('data-subject', studentData.subject);
+                studentCard.setAttribute('data-id', snapshot.key);
+                
+                // 根据类型添加到对应区域
+                if (studentData.type === 'trial') {
+                    document.getElementById('trial-students').appendChild(studentCard);
+                } else {
+                    document.getElementById('formal-students').appendChild(studentCard);
+                }
+                
+                // 更新学生数据映射
+                const studentMap = window.studentMap || {};
+                studentMap[studentData.name] = { 
+                    ...studentData,
+                    firebaseKey: snapshot.key
+                };
+                window.studentMap = studentMap;
+                
+                // 立即更新仪表板统计
+                setTimeout(() => {
+                    updateDashboardStats();
+                    console.log('仪表板统计已更新');
+                }, 100);
+                
+                // 更新课程安排模块的学生列表
+                updateScheduleStudentOptions();
+                
+                // 如果是试课学员，自动添加到课程安排中
+                if (studentData.type === 'trial' && studentData.trialTime) {
+                    console.log('[addNewStudent] 调用addTrialCourseToSchedule:', studentData);
+                    addTrialCourseToSchedule(studentData);
+                }
+                
+                // 关闭模态框
+                closeModal();
+                
+                // 显示成功消息
+                showNotification(`学生 ${studentData.name} 添加成功！`, 'success');
+            }).catch((error) => {
+                console.error('[addNewStudent] 保存学生数据失败:', error);
+                showNotification('保存学生数据失败，请重试', 'error');
+            });
         }
 
         // 删除学生
         function deleteStudent(button) {
             const studentCard = button.closest('.student-card');
             const studentName = studentCard.getAttribute('data-name');
+            const studentId = studentCard.getAttribute('data-id');
             
             if (confirm(`确定要删除学员 ${studentName} 吗？此操作不可恢复。`)) {
-                studentCard.remove();
+                // 从Firebase删除学生数据
+                if (studentId) {
+                    firebase.database().ref('students/' + studentId).remove();
+                } else {
+                    // 如果没有id，通过name查找删除
+                    firebase.database().ref('students').orderByChild('name').equalTo(studentName).once('value')
+                        .then((snapshot) => {
+                            snapshot.forEach((childSnapshot) => {
+                                childSnapshot.ref.remove();
+                            });
+                        });
+                }
                 
                 // 从学生数据映射中删除
                 if (window.studentMap && window.studentMap[studentName]) {
@@ -726,144 +1000,389 @@
 
         // 更新仪表板统计
         function updateDashboardStats() {
-            const formalStudents = document.querySelectorAll('#formal-students .student-card').length;
-            const trialStudents = document.querySelectorAll('#trial-students .student-card').length;
-            const totalStudents = formalStudents + trialStudents;
-            
-            // 更新总学生数
-            const totalStudentsElement = document.querySelector('.card:nth-child(1) .text-2xl');
-            if (totalStudentsElement) {
-                totalStudentsElement.textContent = totalStudents;
-                const subtitle = totalStudentsElement.nextElementSibling;
-                if (subtitle) {
-                    subtitle.textContent = totalStudents > 0 ? `+${totalStudents} 本月新增` : '暂无学生';
+            try {
+                // 从学生管理模块动态读取数据
+                const formalStudents = document.querySelectorAll('#formal-students .student-card').length;
+                const trialStudents = document.querySelectorAll('#trial-students .student-card').length;
+                const totalStudents = formalStudents + trialStudents;
+                
+                console.log('读取到的学生数据:', {
+                    正式学员: formalStudents,
+                    试课学员: trialStudents,
+                    总学员: totalStudents
+                });
+                
+                // 更新仪表板统计卡片
+                const totalStudentsElement = document.getElementById('total-students');
+                const formalStudentsElement = document.getElementById('formal-students-count');
+                const trialStudentsElement = document.getElementById('trial-students-count');
+                const totalIncomeElement = document.getElementById('total-income');
+                
+                console.log('找到的DOM元素:', {
+                    totalStudentsElement: !!totalStudentsElement,
+                    formalStudentsElement: !!formalStudentsElement,
+                    trialStudentsElement: !!trialStudentsElement
+                });
+                
+                console.log('DOM元素内容:', {
+                    totalStudentsElement: totalStudentsElement ? totalStudentsElement.textContent : 'null',
+                    formalStudentsElement: formalStudentsElement ? formalStudentsElement.textContent : 'null',
+                    trialStudentsElement: trialStudentsElement ? trialStudentsElement.textContent : 'null'
+                });
+                
+                if (totalStudentsElement) {
+                    console.log('更新总学生数:', totalStudents);
+                    // 直接更新，不使用动画
+                    totalStudentsElement.textContent = totalStudents;
+                    // animateNumber(totalStudentsElement, totalStudents);
                 }
-            }
-            
-            // 更新正式学员数
-            const monthlyCoursesElement = document.querySelector('.card:nth-child(2) .text-2xl');
-            if (monthlyCoursesElement) {
-                monthlyCoursesElement.textContent = formalStudents;
-                const subtitle = monthlyCoursesElement.nextElementSibling;
-                if (subtitle) {
-                    subtitle.textContent = formalStudents > 0 ? `${formalStudents} 名学员` : '暂无正式学员';
+                if (formalStudentsElement) {
+                    console.log('更新正式学员数:', formalStudents);
+                    // 直接更新，不使用动画
+                    formalStudentsElement.textContent = formalStudents;
+                    // animateNumber(formalStudentsElement, formalStudents);
                 }
-            }
-            
-            // 更新试课学员数
-            const trialCoursesElement = document.querySelector('.card:nth-child(3) .text-2xl');
-            if (trialCoursesElement) {
-                trialCoursesElement.textContent = trialStudents;
-                const subtitle = trialCoursesElement.nextElementSibling;
-                if (subtitle) {
-                    subtitle.textContent = trialStudents > 0 ? `${trialStudents} 名学员` : '暂无试课学员';
+                if (trialStudentsElement) {
+                    console.log('更新试课学员数:', trialStudents);
+                    // 直接更新，不使用动画
+                    trialStudentsElement.textContent = trialStudents;
+                    // animateNumber(trialStudentsElement, trialStudents);
                 }
-            }
-            
-            // 更新总薪资
-            const feedbackElement = document.querySelector('.card:nth-child(4) .text-2xl');
-            if (feedbackElement) {
-                const totalSalary = completedCourses.reduce((total, course) => {
-                    return total + parseFloat(getCoursePrice(course));
-                }, 0);
-                feedbackElement.textContent = '¥' + totalSalary.toFixed(1);
-                const subtitle = feedbackElement.nextElementSibling;
-                if (subtitle) {
-                    subtitle.textContent = totalSalary > 0 ? `${totalSalary.toFixed(1)} 元总收入` : '暂无收入';
+                
+                // 更新学生管理页面的快速统计
+                const formalCount = document.getElementById('formal-count');
+                const trialCount = document.getElementById('trial-count');
+                const newCount = document.getElementById('new-count');
+                
+                if (formalCount) {
+                    console.log('更新学生管理页面正式学员数:', formalStudents);
+                    formalCount.textContent = formalStudents;
                 }
+                if (trialCount) {
+                    console.log('更新学生管理页面试课学员数:', trialStudents);
+                    trialCount.textContent = trialStudents;
+                }
+                if (newCount) {
+                    console.log('更新学生管理页面总学员数:', totalStudents);
+                    newCount.textContent = totalStudents;
+                }
+                
+                // 计算总收入（从已完成课程列表读取）
+                const completedCourses = document.querySelectorAll('#completed-courses-list tr');
+                let totalIncome = 0;
+                completedCourses.forEach(course => {
+                    const priceElement = course.querySelector('td:nth-child(7)');
+                    if (priceElement) {
+                        const price = parseFloat(priceElement.textContent.replace('¥', '')) || 0;
+                        totalIncome += price;
+                    }
+                });
+                // 修复精度问题，保留一位小数
+                totalIncome = Math.round(totalIncome * 10) / 10;
+                
+                if (totalIncomeElement) {
+                    console.log('更新总收入:', totalIncome);
+                    totalIncomeElement.textContent = '¥' + totalIncome.toFixed(1);
+                }
+                
+                // 更新今日课程数（从课程安排表格读取）
+                const todayCoursesElement = document.getElementById('today-courses');
+                if (todayCoursesElement) {
+                    const today = new Date().getDay();
+                    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                    const todayCourses = document.querySelectorAll(`[data-day="${dayNames[today]}"]`).length;
+                    console.log('更新今日课程数:', todayCourses);
+                    todayCoursesElement.textContent = todayCourses;
+                }
+                
+                // 更新本月收入（从已完成课程列表读取）
+                const monthlyIncomeElement = document.getElementById('monthly-income');
+                if (monthlyIncomeElement) {
+                    const currentMonth = new Date().getMonth();
+                    let monthlyIncome = 0;
+                    completedCourses.forEach(course => {
+                        const dateElement = course.querySelector('td:nth-child(5)');
+                        if (dateElement) {
+                            const courseDate = new Date(dateElement.textContent);
+                            if (courseDate.getMonth() === currentMonth) {
+                                const priceElement = course.querySelector('td:nth-child(7)');
+                                if (priceElement) {
+                                    const price = parseFloat(priceElement.textContent.replace('¥', '')) || 0;
+                                    monthlyIncome += price;
+                                }
+                            }
+                        }
+                    });
+                    // 修复精度问题，保留一位小数
+                    monthlyIncome = Math.round(monthlyIncome * 10) / 10;
+                    console.log('更新本月收入:', monthlyIncome);
+                    monthlyIncomeElement.textContent = '¥' + monthlyIncome.toFixed(1);
+                }
+                
+                // 更新完成率
+                const completionRateElement = document.getElementById('completion-rate');
+                if (completionRateElement) {
+                    const scheduledCourses = document.querySelectorAll('#schedule-table-body td[data-course]').length;
+                    const completedCount = completedCourses.length;
+                    const completionRate = scheduledCourses > 0 ? Math.round((completedCount / scheduledCourses) * 100) : 0;
+                    console.log('更新完成率:', completionRate);
+                    completionRateElement.textContent = completionRate + '%';
+                }
+                
+                console.log('仪表板统计更新完成:', {
+                    总学生数: totalStudents,
+                    正式学员: formalStudents,
+                    试课学员: trialStudents,
+                    总收入: totalIncome
+                });
+                
+            } catch (error) {
+                console.error('更新仪表板统计出错:', error);
             }
         }
-
-        // 将试课学员自动添加到课程安排
-        function addTrialCourseToSchedule(studentData) {
-            if (!studentData.trialTime) return;
-            
-            const trialDate = new Date(studentData.trialTime);
-            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-            const day = dayNames[trialDate.getDay()];
-            const time = trialDate.getHours().toString().padStart(2, '0') + ':' + trialDate.getMinutes().toString().padStart(2, '0');
-            
-            const newCourse = {
-                id: Date.now().toString(),
-                studentName: studentData.name,
-                subject: studentData.subject,
-                day: day,
-                time: time,
-                duration: 60, // 试课默认60分钟
-                type: 'trial',
-                status: 'scheduled'
-            };
-            
-            // 检查时间冲突
-            const conflict = scheduleData.find(course => {
-                if (course.day === day && course.status !== 'completed') {
-                    const newStartHour = parseInt(time.split(':')[0]);
-                    const newStartMinute = parseInt(time.split(':')[1]);
-                    const newStartMinutes = newStartHour * 60 + newStartMinute;
-                    const newEndMinutes = newStartMinutes + 60; // 试课60分钟
-                    
-                    const existingStartHour = parseInt(course.time.split(':')[0]);
-                    const existingStartMinute = parseInt(course.time.split(':')[1]);
-                    const existingStartMinutes = existingStartHour * 60 + existingStartMinute;
-                    const existingEndMinutes = existingStartMinutes + course.duration;
-                    
-                    return (newStartMinutes < existingEndMinutes && newEndMinutes > existingStartMinutes);
-                }
-                return false;
-            });
-            
-            if (conflict) {
-                showNotification(`试课时间冲突！${conflict.studentName} 在 ${getDayName(conflict.day)}${conflict.time} 已有课程安排`, 'error');
+        
+        // 数字动画效果
+        function animateNumber(element, targetValue, prefix, suffix) {
+            if (!element) {
+                console.log('animateNumber: element is null');
                 return;
             }
             
-            // 保存到Firebase
-            firebase.database().ref('schedule').push(newCourse);
+            prefix = prefix || '';
+            suffix = suffix || '';
             
-            showNotification(`试课学员 ${studentData.name} 已自动添加到课程安排！`, 'success');
+            console.log('animateNumber 开始:', {
+                element: element.textContent,
+                targetValue: targetValue,
+                prefix: prefix,
+                suffix: suffix
+            });
+            
+            const currentValue = parseInt(element.textContent.replace(/[^\d]/g, '')) || 0;
+            const increment = (targetValue - currentValue) / 20;
+            let current = currentValue;
+            
+            console.log('animateNumber 计算:', {
+                currentValue: currentValue,
+                increment: increment,
+                targetValue: targetValue
+            });
+            
+            const animate = () => {
+                current += increment;
+                if ((increment > 0 && current >= targetValue) || (increment < 0 && current <= targetValue)) {
+                    const finalValue = prefix + targetValue + suffix;
+                    element.textContent = finalValue;
+                    console.log('animateNumber 完成:', finalValue);
+                } else {
+                    const currentValue = prefix + Math.round(current) + suffix;
+                    element.textContent = currentValue;
+                    requestAnimationFrame(animate);
+                }
+            };
+            
+            animate();
         }
 
-        // 更新课程安排模块的学生选项
-        function updateScheduleStudentOptions() {
-            // 获取所有学生
-            const formalStudents = Array.from(document.querySelectorAll('#formal-students .student-card')).map(card => ({
-                name: card.getAttribute('data-name'),
-                subject: card.getAttribute('data-subject'),
-                grade: card.getAttribute('data-grade'),
-                type: 'formal'
-            }));
-            
-            const trialStudents = Array.from(document.querySelectorAll('#trial-students .student-card')).map(card => ({
-                name: card.getAttribute('data-name'),
-                subject: card.getAttribute('data-subject'),
-                grade: card.getAttribute('data-grade'),
-                type: 'trial'
-            }));
-            
-            const allStudents = [...formalStudents, ...trialStudents];
-            
-            // 更新课程安排模态框中的学生选择下拉框
-            const scheduleStudentSelect = document.querySelector('select[name="studentName"]');
-            if (scheduleStudentSelect) {
-                // 保存当前选中的值
-                const currentValue = scheduleStudentSelect.value;
-                
-                // 清空现有选项
-                scheduleStudentSelect.innerHTML = '<option value="">请选择学员</option>';
-                
-                // 添加新的学生选项
-                allStudents.forEach(student => {
-                    const option = document.createElement('option');
-                    option.value = student.name;
-                    option.textContent = `${student.name} (${student.grade} · ${student.subject} · ${student.type === 'trial' ? '试课' : '正式'})`;
-                    scheduleStudentSelect.appendChild(option);
-                });
-                
-                // 恢复之前选中的值（如果还存在）
-                if (currentValue && allStudents.some(s => s.name === currentValue)) {
-                    scheduleStudentSelect.value = currentValue;
+        // 判断时间段是否有冲突
+        function isTimeSlotOccupied(day, startTime, duration, excludeCourseId) {
+            const startMinutes = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1]);
+            const endMinutes = startMinutes + duration;
+            for (let course of scheduleData) {
+                if (course.status === 'completed') continue;
+                if (excludeCourseId && course.firebaseKey === excludeCourseId) continue;
+                if (course.day !== day) continue;
+                const cStart = parseInt(course.time.split(':')[0]) * 60 + parseInt(course.time.split(':')[1]);
+                const cEnd = cStart + course.duration;
+                // 判断是否有重叠
+                if (Math.max(startMinutes, cStart) < Math.min(endMinutes, cEnd)) {
+                    return course;
                 }
             }
+            return null;
+        }
+
+        // 生成时间表（合并单元格显示课程信息）
+        function generateScheduleTable() {
+            const tableBody = document.getElementById('schedule-table-body');
+            if (!tableBody) return;
+
+            tableBody.innerHTML = '';
+            // 记录每个day+time是否已被合并渲染
+            const mergedMap = {};
+            // 生成时间行（8:00-24:00，每30分钟一行）
+            for (let hour = 8; hour <= 23; hour++) {
+                for (let minute = 0; minute < 60; minute += 30) {
+                    const row = document.createElement('tr');
+                    const timeCell = document.createElement('td');
+                    timeCell.className = 'border border-gray-200 px-2 py-1 text-xs text-gray-600 bg-gray-50 font-medium';
+                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    timeCell.textContent = timeString;
+                    row.appendChild(timeCell);
+
+                    // 为每一天创建单元格
+                    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                    days.forEach(day => {
+                        const cellKey = day + '-' + timeString;
+                        // 检查该格子是否已被合并渲染
+                        if (mergedMap[cellKey]) {
+                            // 已被rowspan合并，不渲染td
+                            return;
+                        }
+                        // 查找该时间段的课程（只显示未完成的）
+                        const course = scheduleData.find(course => {
+                            if (course.status === 'completed') return false;
+                            if (course.day !== day) return false;
+                            const courseTime = course.time;
+                            const courseHour = parseInt(courseTime.split(':')[0]);
+                            const courseMinute = parseInt(courseTime.split(':')[1]);
+                            const courseStartMinutes = courseHour * 60 + courseMinute;
+                            const courseEndMinutes = courseStartMinutes + course.duration;
+                            const currentMinutes = hour * 60 + minute;
+                            // 只在课程起始格渲染
+                            return currentMinutes === courseStartMinutes;
+                        });
+                        if (course) {
+                            // 计算rowspan
+                            const rowspan = Math.ceil(course.duration / 30);
+                            // 标记后续格子为已合并
+                            for (let i = 1; i < rowspan; i++) {
+                                const nextMinutes = hour * 60 + minute + i * 30;
+                                const nextHour = Math.floor(nextMinutes / 60);
+                                const nextMinute = nextMinutes % 60;
+                                const nextTimeString = `${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`;
+                                mergedMap[day + '-' + nextTimeString] = true;
+                            }
+                            // 渲染合并单元格
+                            const studentColor = generateStudentColor(course.studentName);
+                            const cell = document.createElement('td');
+                            cell.className = `border border-gray-200 px-1 py-1 text-xs relative align-middle ${studentColor.bg} ${studentColor.text} ${studentColor.border}`;
+                            cell.setAttribute('rowspan', rowspan);
+                            // 计算结束时间
+                            const courseStart = course.time;
+                            const courseEndMinutes = parseInt(course.time.split(':')[0]) * 60 + parseInt(course.time.split(':')[1]) + course.duration;
+                            const endHour = Math.floor(courseEndMinutes / 60);
+                            const endMinute = courseEndMinutes % 60;
+                            const courseEnd = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+                            cell.innerHTML = `
+                                <div class="font-bold text-xs">${course.studentName}</div>
+                                <div class="text-xs">${courseStart} - ${courseEnd}</div>
+                                <div class="text-xs">${course.subject}</div>
+                                <button class="absolute top-1 right-1 text-green-600 hover:text-green-700 transition-colors" onclick="event.stopPropagation();completeCourseConfirm('${course.firebaseKey}')" title="标记完成"><i data-lucide="check" class="w-3 h-3"></i></button>
+                            `;
+                            cell.onclick = (event) => {
+                                if (event.target.closest('button')) {
+                                    return;
+                                }
+                                showCourseStudentDetail(course);
+                            };
+                            cell.style.cursor = 'pointer';
+                            setTimeout(() => {
+                                lucide.createIcons();
+                            }, 0);
+                            row.appendChild(cell);
+                        } else {
+                            // 没有课程，正常渲染空格子
+                            const cell = document.createElement('td');
+                            cell.className = 'border border-gray-200 px-1 py-1 text-xs relative';
+                            row.appendChild(cell);
+                        }
+                    });
+                    tableBody.appendChild(row);
+                }
+            }
+        }
+
+        // 修改试课学员自动添加课程的冲突检测
+        function addTrialCourseToSchedule(studentData) {
+            if (!studentData.trialTime) {
+                console.log('[addTrialCourseToSchedule] 未填写试课时间:', studentData);
+                return;
+            }
+            let trialDate = new Date(studentData.trialTime);
+            // 自动对齐到最近的半小时
+            const rawMinute = trialDate.getMinutes();
+            let roundedMinute = 0;
+            if (rawMinute < 15) {
+                roundedMinute = 0;
+            } else if (rawMinute < 45) {
+                roundedMinute = 30;
+            } else {
+                roundedMinute = 0;
+                trialDate.setHours(trialDate.getHours() + 1);
+            }
+            trialDate.setMinutes(roundedMinute, 0, 0);
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const day = dayNames[trialDate.getDay()];
+            const time = trialDate.getHours().toString().padStart(2, '0') + ':' + trialDate.getMinutes().toString().padStart(2, '0');
+            const duration = 60;
+            // 冲突检测
+            const conflict = isTimeSlotOccupied(day, time, duration);
+            if (conflict) {
+                console.log('[addTrialCourseToSchedule] 冲突:', conflict);
+                showNotification(`试课时间冲突！${conflict.studentName} 在 ${getDayName(conflict.day)}${conflict.time} 已有课程安排`, 'error');
+                return;
+            }
+            // 检查Firebase中是否已存在该试课学员的课程
+            firebase.database().ref('schedule').orderByChild('studentName').equalTo(studentData.name).once('value', snapshot => {
+                let exists = false;
+                snapshot.forEach(child => {
+                    const course = child.val();
+                    if (course.type === 'trial' && course.trialTime === studentData.trialTime) {
+                        exists = true;
+                    }
+                });
+                if (exists) {
+                    console.log('[addTrialCourseToSchedule] 已存在该试课学员的课程:', studentData.name, studentData.trialTime);
+                    return;
+                }
+                // 添加到Firebase
+                const newCourse = {
+                    studentName: studentData.name,
+                    subject: studentData.subject,
+                    day: day,
+                    time: time,
+                    duration: duration, // 试课默认60分钟
+                    type: 'trial',
+                    status: 'scheduled',
+                    trialTime: studentData.trialTime,
+                    phone: studentData.phone || ''
+                };
+                firebase.database().ref('schedule').push(newCourse).then(() => {
+                    console.log('[addTrialCourseToSchedule] 已写入schedule:', newCourse);
+                }).catch((err) => {
+                    console.error('[addTrialCourseToSchedule] 写入schedule失败:', err);
+                });
+            });
+        }
+
+        // 修改添加新课程的冲突检测
+        function addNewCourse(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const courseData = Object.fromEntries(formData);
+            // 确定学员类型和科目
+            const studentInfo = getStudentInfo(courseData.studentName);
+            const duration = parseInt(courseData.duration);
+            // 冲突检测
+            const conflict = isTimeSlotOccupied(courseData.day, courseData.time, duration);
+            if (conflict) {
+                showNotification(`时间冲突！${conflict.studentName} 在 ${getDayName(conflict.day)}${conflict.time} 已有课程安排`, 'error');
+                return;
+            }
+            const newCourse = {
+                studentName: courseData.studentName,
+                subject: studentInfo.subject,
+                day: courseData.day,
+                time: courseData.time,
+                duration: duration,
+                type: studentInfo.type,
+                status: 'scheduled'
+            };
+            // 保存到Firebase
+            firebase.database().ref('schedule').push(newCourse);
+            closeModal();
+            showNotification(`课程安排成功！${courseData.studentName} - ${studentInfo.subject}`, 'success');
         }
 
         // 切换试课时间字段显示
@@ -885,12 +1404,16 @@
         // 创建学生卡片
         function createStudentCard(studentData) {
             const card = document.createElement('div');
-            card.className = 'card student-card';
+            card.className = 'card student-card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1';
             card.setAttribute('data-subject', studentData.subject);
             card.setAttribute('data-name', studentData.name);
             card.setAttribute('data-grade', studentData.grade);
+            if (studentData.id) {
+                card.setAttribute('data-id', studentData.id);
+            }
             
             const today = new Date().toISOString().split('T')[0];
+            const studentImage = studentData.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face';
             
             if (studentData.type === 'trial') {
                 // 格式化试课时间
@@ -902,53 +1425,79 @@
                     minute: '2-digit'
                 }) : '';
                 
-                            card.innerHTML = `
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">${studentData.name}</h3>
-                        <p class="text-sm text-gray-600">${studentData.grade} · ${studentData.subject}</p>
+                card.innerHTML = `
+                    <div class="flex items-start space-x-4 mb-4">
+                        <div class="flex-shrink-0">
+                            <img src="${studentImage}" alt="${studentData.name}" class="w-16 h-16 rounded-full object-cover border-2 border-yellow-200">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">${studentData.name}</h3>
+                                    <p class="text-sm text-gray-600">${studentData.grade} · ${studentData.subject}</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        试学中
+                                    </span>
+                                    <button class="text-green-600 hover:text-green-700 transition-colors" onclick="convertToFormal(this)" title="转为正式成员">
+                                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="space-y-1 text-sm text-gray-600 mt-2">
+                                <p class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i>${studentData.phone}</p>
+                                <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i>北京市</p>
+                                <p class="flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i>加入时间: ${today}</p>
+                                ${trialTime ? `<p class="flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i>试课时间: ${trialTime}</p>` : ''}
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            试学中
-                        </span>
-                        <button class="text-green-600 hover:text-green-700 transition-colors" onclick="convertToFormal(this)" title="转为正式成员">
-                            <i data-lucide="check-circle" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="space-y-2 text-sm text-gray-600">
-                    <p>📞 ${studentData.phone}</p>
-                    <p>📍 北京市</p>
-                    <p>📅 加入时间: ${today}</p>
-                    ${trialTime ? `<p>⏰ 试课时间: ${trialTime}</p>` : ''}
-                </div>
                     <div class="flex gap-2 mt-4">
-                        <button class="btn-primary text-sm">编辑</button>
-                        <button class="btn-secondary text-sm">查看详情</button>
-                        <button class="btn-secondary text-sm text-red-600 hover:text-red-700" onclick="deleteStudent(this)">删除</button>
+                        <button class="btn-primary text-sm flex items-center gap-1">
+                            <i data-lucide="edit" class="w-4 h-4"></i>编辑
+                        </button>
+                        <button class="btn-secondary text-sm flex items-center gap-1">
+                            <i data-lucide="eye" class="w-4 h-4"></i>详情
+                        </button>
+                        <button class="btn-secondary text-sm text-red-600 hover:text-red-700 flex items-center gap-1" onclick="deleteStudent(this)">
+                            <i data-lucide="trash" class="w-4 h-4"></i>删除
+                        </button>
                     </div>
                 `;
             } else {
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">${studentData.name}</h3>
-                            <p class="text-sm text-gray-600">${studentData.grade} · ${studentData.subject}</p>
+                    <div class="flex items-start space-x-4 mb-4">
+                        <div class="flex-shrink-0">
+                            <img src="${studentImage}" alt="${studentData.name}" class="w-16 h-16 rounded-full object-cover border-2 border-green-200">
                         </div>
-                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            正式学员
-                        </span>
-                    </div>
-                    <div class="space-y-2 text-sm text-gray-600">
-                        <p>📞 ${studentData.phone}</p>
-                        <p>📍 北京市</p>
-                        <p>📅 加入时间: ${today}</p>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">${studentData.name}</h3>
+                                    <p class="text-sm text-gray-600">${studentData.grade} · ${studentData.subject}</p>
+                                </div>
+                                <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    正式学员
+                                </span>
+                            </div>
+                            <div class="space-y-1 text-sm text-gray-600 mt-2">
+                                <p class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i>${studentData.phone}</p>
+                                <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i>北京市</p>
+                                <p class="flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i>加入时间: ${today}</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="flex gap-2 mt-4">
-                        <button class="btn-primary text-sm">编辑</button>
-                        <button class="btn-secondary text-sm">查看详情</button>
-                        <button class="btn-secondary text-sm text-red-600 hover:text-red-700" onclick="deleteStudent(this)">删除</button>
+                        <button class="btn-primary text-sm flex items-center gap-1">
+                            <i data-lucide="edit" class="w-4 h-4"></i>编辑
+                        </button>
+                        <button class="btn-secondary text-sm flex items-center gap-1">
+                            <i data-lucide="eye" class="w-4 h-4"></i>详情
+                        </button>
+                        <button class="button-secondary text-sm text-red-600 hover:text-red-700 flex items-center gap-1" onclick="deleteStudent(this)">
+                            <i data-lucide="trash" class="w-4 h-4"></i>删除
+                        </button>
                     </div>
                 `;
             }
@@ -956,8 +1505,11 @@
             return card;
         }
 
-        // 课程数据 - 从Firebase加载
+        // 全局数据变量 - 统一管理所有数据
         let scheduleData = [];
+        let completedCourses = [];
+        let feedbackData = [];
+        let studentsData = [];
 
         // 学员颜色映射 - 动态生成
         const studentColors = {};
@@ -979,74 +1531,6 @@
                 studentColors[studentName] = colors[colorIndex];
             }
             return studentColors[studentName];
-        }
-
-        // 生成时间表
-        function generateScheduleTable() {
-            const tableBody = document.getElementById('schedule-table-body');
-            if (!tableBody) return;
-
-            tableBody.innerHTML = '';
-            // 生成时间行（8:00-24:00，每30分钟一行）
-            for (let hour = 8; hour <= 23; hour++) {
-                for (let minute = 0; minute < 60; minute += 30) {
-                    const row = document.createElement('tr');
-                    const timeCell = document.createElement('td');
-                    timeCell.className = 'border border-gray-200 px-2 py-1 text-xs text-gray-600 bg-gray-50 font-medium';
-                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                    timeCell.textContent = timeString;
-                    row.appendChild(timeCell);
-
-                    // 为每一天创建单元格
-                    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-                    days.forEach(day => {
-                        const cell = document.createElement('td');
-                        cell.className = 'border border-gray-200 px-1 py-1 text-xs relative';
-                        cell.setAttribute('data-day', day);
-                        cell.setAttribute('data-time', timeString);
-                        // 查找该时间段的课程（只显示未完成的）
-                        const courses = scheduleData.filter(course => {
-                            if (course.status === 'completed') return false;
-                            const courseTime = course.time;
-                            const courseHour = parseInt(courseTime.split(':')[0]);
-                            const courseMinute = parseInt(courseTime.split(':')[1]);
-                            const courseStartMinutes = courseHour * 60 + courseMinute;
-                            const courseEndMinutes = courseStartMinutes + course.duration;
-                            const currentMinutes = hour * 60 + minute;
-                            const nextMinutes = currentMinutes + 30;
-                            const matches = course.day === day && 
-                                           courseStartMinutes <= currentMinutes && 
-                                           courseEndMinutes > currentMinutes;
-                            return matches;
-                        });
-                        if (courses.length > 0) {
-                            const course = courses[0];
-                            const studentColor = generateStudentColor(course.studentName);
-                            const courseTime = course.time;
-                            const courseHour = parseInt(courseTime.split(':')[0]);
-                            const courseMinute = parseInt(courseTime.split(':')[1]);
-                            const courseStartMinutes = courseHour * 60 + courseMinute;
-                            const currentMinutes = hour * 60 + minute;
-                            // 所有占用格都显示姓名和√按钮
-                            cell.className += ` ${studentColor.bg} ${studentColor.text} ${studentColor.border}`;
-                            cell.innerHTML = `<div class=\"font-medium text-xs\">${course.studentName}</div>
-                                <button class=\"absolute top-1 right-1 text-green-600 hover:text-green-700 transition-colors\" onclick=\"event.stopPropagation();completeCourseConfirm('${course.id}')\" title=\"标记完成\"><i data-lucide=\"check\" class=\"w-3 h-3\"></i></button>`;
-                            cell.onclick = (event) => {
-                                if (event.target.closest('button')) {
-                                    return;
-                                }
-                                showCourseStudentDetail(course);
-                            };
-                            cell.style.cursor = 'pointer';
-                            setTimeout(() => {
-                                lucide.createIcons();
-                            }, 0);
-                        }
-                        row.appendChild(cell);
-                    });
-                    tableBody.appendChild(row);
-                }
-            }
         }
 
         // 显示课程详情
@@ -1094,8 +1578,7 @@
                                 </div>
                             </div>
                             <div class="flex gap-3 mt-6">
-                                <button onclick="editCourse('${course.id}')" class="btn-primary flex-1">编辑</button>
-                                <button onclick="deleteCourse('${course.id}')" class="btn-secondary flex-1 text-red-600">删除</button>
+                                <button onclick="closeModal()" class="btn-secondary flex-1">关闭</button>
                             </div>
                         </div>
                     </div>
@@ -1155,11 +1638,6 @@
             
             const allStudents = [...formalStudents, ...trialStudents];
             
-            if (allStudents.length === 0) {
-                showNotification('请先在学员管理中添加学员！', 'error');
-                return;
-            }
-
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 z-50 overflow-y-auto';
             modal.innerHTML = `
@@ -1171,7 +1649,7 @@
                     <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">安排课程</h3>
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">添加课程安排</h3>
                                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
                                     <i data-lucide="x" class="w-5 h-5"></i>
                                 </button>
@@ -1201,7 +1679,7 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-gray-700 mb-1">时间 *</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">时间 *</label>
                                         <input type="time" name="time" required class="input-field">
                                     </div>
                                     <div>
@@ -1210,7 +1688,7 @@
                                     </div>
                                 </div>
                                 <div class="flex gap-3 mt-6">
-                                    <button type="submit" class="btn-primary flex-1">安排课程</button>
+                                    <button type="submit" class="btn-primary flex-1">添加课程</button>
                                     <button type="button" onclick="closeModal()" class="btn-secondary flex-1">取消</button>
                                 </div>
                             </form>
@@ -1223,147 +1701,61 @@
             lucide.createIcons();
         }
 
-        // 添加新课程
-        function addNewCourse(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const courseData = Object.fromEntries(formData);
-            
-            // 确定学员类型和科目
-            const studentInfo = getStudentInfo(courseData.studentName);
-            
-            const newCourse = {
-                id: Date.now().toString(),
-                studentName: courseData.studentName,
-                subject: studentInfo.subject,
-                day: courseData.day,
-                time: courseData.time,
-                duration: parseInt(courseData.duration),
-                type: studentInfo.type,
-                status: 'scheduled'
-            };
-            
-            // 检查时间冲突
-            const conflict = scheduleData.find(course => {
-                if (course.day === courseData.day && course.status !== 'completed') {
-                    const newStart = parseInt(courseData.time.split(':')[0]);
-                    const newEnd = newStart + Math.ceil(parseInt(courseData.duration) / 60);
-                    const existingStart = parseInt(course.time.split(':')[0]);
-                    const existingEnd = existingStart + Math.ceil(course.duration / 60);
-                    
-                    return (newStart < existingEnd && newEnd > existingStart);
-                }
-                return false;
-            });
-            
-            if (conflict) {
-                showNotification(`时间冲突！${conflict.studentName} 在 ${getDayName(conflict.day)}${conflict.time} 已有课程安排`, 'error');
-                return;
-            }
-            
-            // 保存到Firebase
-            firebase.database().ref('schedule').push(newCourse);
-            
-            closeModal();
-            showNotification(`课程安排成功！${courseData.studentName} - ${studentInfo.subject}`, 'success');
-        }
-
         // 获取学员信息
         function getStudentInfo(studentName) {
             const studentMap = window.studentMap || {};
             return studentMap[studentName] || { subject: '未知', type: 'formal', grade: '未知' };
         }
 
-        // 编辑课程
+        // 编辑课程（已废弃，使用课程安排表格中的功能）
         function editCourse(courseId) {
-            // 这里可以添加编辑课程的逻辑
-            showNotification('编辑功能开发中...', 'info');
+            showNotification('请使用课程安排表格中的功能', 'info');
         }
 
-        // 已完成课程记录 - 从Firebase加载
-        let completedCourses = [];
-        
+        // 完成课程（已废弃，使用 completeCourseConfirm）
+        function completeCourse(courseId, button) {
+            showNotification('请使用课程安排表格中的完成按钮', 'info');
+        }
+
+        // 删除课程（已废弃，使用课程安排表格中的删除功能）
+        function deleteCourse(courseId) {
+            showNotification('请使用课程安排表格中的删除按钮', 'info');
+        }
+
         // 获取所有已完成的课程
-        function getCurrentMonthCompletedCourses() {
+        function getCurrentMonthCompletedCourses(completedCourses) {
             try {
-                return completedCourses;
+                // 只返回本月的
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1;
+                return (completedCourses || []).filter(course => {
+                    if (!course.completedTime) return false;
+                    const date = new Date(course.completedTime);
+                    return date.getFullYear() === year && (date.getMonth() + 1) === month;
+                });
             } catch (error) {
                 console.error('Error in getCurrentMonthCompletedCourses:', error);
                 return [];
             }
         }
 
-        // 完成课程
-        function completeCourse(courseId, button) {
-            try {
-                const courseIndex = scheduleData.findIndex(course => course.id === courseId);
-                
-                if (courseIndex !== -1) {
-                    const course = scheduleData[courseIndex];
-                    
-                    // 显示确认对话框
-                    if (confirm(`是否完成课程？\n\n学员：${course.studentName}\n科目：${course.subject}\n时间：${getDayName(course.day)}${course.time}\n类型：${course.type === 'trial' ? '试课' : '正课'}\n时长：${course.duration}分钟`)) {
-                        const completedCourse = {
-                            ...course,
-                            completedTime: new Date().toLocaleString('zh-CN'),
-                            status: 'completed'
-                        };
-                        
-                        // 保存到Firebase已完成课程
-                        firebase.database().ref('completed').push(completedCourse);
-                        
-                        // 从Firebase课程安排中删除
-                        firebase.database().ref('schedule/' + courseId).remove();
-                        
-                        // 显示成功消息
-                        showNotification(`${course.studentName} 的课程已完成！`, 'success');
-                    }
-                } else {
-                    showNotification('课程未找到！', 'error');
-                }
-            } catch (error) {
-                console.error('Error in completeCourse:', error);
-                showNotification('完成课程时出现错误：' + error.message, 'error');
-            }
-        }
-
-        // 删除课程
-        function deleteCourse(courseId) {
-            const courseIndex = scheduleData.findIndex(course => course.id === courseId);
-            if (courseIndex !== -1) {
-                const course = scheduleData[courseIndex];
-                if (confirm(`确定要删除 ${course.studentName} 的课程吗？`)) {
-                    // 从Firebase删除
-                    firebase.database().ref('schedule/' + courseId).remove();
-                    
-                    closeModal();
-                    showNotification(`课程已删除！`, 'success');
-                }
-            }
-        }
-
         // 更新已完成课程列表
-        function updateCompletedCoursesList() {
+        function updateCompletedCoursesList(completedCourses) {
             try {
                 const completedList = document.getElementById('completed-courses-list');
                 const completedCount = document.getElementById('completed-count');
-                
                 if (!completedList) {
                     return;
                 }
-                
                 completedList.innerHTML = '';
-                
                 // 显示所有已完成的课程
-                const currentMonthCourses = getCurrentMonthCompletedCourses();
+                const currentMonthCourses = getCurrentMonthCompletedCourses(completedCourses);
                 completedCount.textContent = currentMonthCourses.length;
-                
                 let totalSalary = 0;
-                
                 currentMonthCourses.forEach(course => {
                     const coursePrice = parseFloat(getCoursePrice(course));
                     totalSalary += coursePrice;
-                    
                     const row = document.createElement('tr');
                     row.className = 'border-b border-gray-100 hover:bg-gray-50';
                     row.innerHTML = `
@@ -1380,29 +1772,28 @@
                                 }">
                                     ${course.type === 'trial' ? '试课' : 
                                       course.type === 'converted' ? '正式（转正）' : '正式'}（${course.duration}分钟）
-                                    </span>
-                                ${course.type === 'trial' ? `
-                                    <button class="text-green-600 hover:text-green-700 transition-colors" onclick="convertTrialToFormal('${course.id}')" title="转为正式">
-                                        <i data-lucide="check-circle" class="w-4 h-4"></i>
-                                    </button>
-                                ` : ''}
+                                </span>
+
                             </div>
                         </td>
                         <td class="py-3 px-4">¥${getCoursePrice(course)}</td>
+                        <td class="py-3 px-4">
+                            <button class="text-red-600 hover:text-red-700 transition-colors" onclick="deleteCompletedCourse('${course.firebaseKey}')" title="删除">
+                                <i data-lucide=\"trash\" class=\"w-4 h-4\"></i>
+                            </button>
+                        </td>
                     `;
                     completedList.appendChild(row);
                 });
-                
                 // 添加总薪资行
                 const totalRow = document.createElement('tr');
                 totalRow.className = 'border-t-2 border-gray-300 bg-gray-50 font-semibold';
                 totalRow.innerHTML = `
                     <td class="py-3 px-4" colspan="6">总薪资</td>
                     <td class="py-3 px-4">¥${totalSalary.toFixed(1)}</td>
+                    <td></td>
                 `;
                 completedList.appendChild(totalRow);
-                
-                // 重新初始化图标
                 setTimeout(() => {
                     lucide.createIcons();
                 }, 0);
@@ -1421,53 +1812,6 @@
             } catch (error) {
                 console.error('Error in getStudentGrade:', error);
                 return '未知';
-            }
-        }
-
-        // 试课转正功能
-        function convertTrialToFormal(courseId) {
-            const courseIndex = completedCourses.findIndex(course => course.id === courseId);
-            if (courseIndex !== -1) {
-                const course = completedCourses[courseIndex];
-                
-                if (confirm(`是否确认转正？\n学员：${course.studentName}\n科目：${course.subject}\n年级：${getStudentGrade(course.studentName)}`)) {
-                    // 更新课程类型为转正
-                    completedCourses[courseIndex].type = 'converted';
-                    
-                    // 更新学员管理中的状态
-                    const studentCard = document.querySelector(`[data-name="${course.studentName}"]`);
-                    if (studentCard) {
-                        // 找到试课学员卡片并移动到正式学员区域
-                        const trialStudentsContainer = document.getElementById('trial-students');
-                        const formalStudentsContainer = document.getElementById('formal-students');
-                        
-                        if (trialStudentsContainer && formalStudentsContainer) {
-                            // 更新卡片状态
-                            const statusSpan = studentCard.querySelector('.bg-yellow-100');
-                            if (statusSpan) {
-                                statusSpan.className = 'px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
-                                statusSpan.textContent = '正式学员';
-                            }
-                            
-                            // 移除转正按钮
-                            const convertButton = studentCard.querySelector('.text-green-600');
-                            if (convertButton) {
-                                convertButton.remove();
-                            }
-                            
-                            // 移动到正式学员区域
-                            formalStudentsContainer.appendChild(studentCard);
-                        }
-                    }
-                    
-                    // 更新已完成课程列表
-                    updateCompletedCoursesList();
-                    
-                    // 更新仪表板统计
-                    updateDashboardStats();
-                    
-                    showNotification(`${course.studentName} 已成功转为正式学员！`, 'success');
-                }
             }
         }
 
@@ -1494,7 +1838,9 @@
                             hourlyRate = 60;
                             break;
                     }
-                    return (hourlyRate * hours).toFixed(1);
+                    const price = hourlyRate * hours;
+                    // 修复精度问题，保留一位小数
+                    return (Math.round(price * 10) / 10).toFixed(1);
                 }
                 return '0';
             } catch (error) {
@@ -1710,8 +2056,7 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
             });
         }
 
-        // 反馈数据存储 - 从Firebase加载
-        let feedbackData = [];
+
 
         // 显示添加反馈模态框
         function showAddFeedbackModal() {
@@ -2154,75 +2499,7 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
           });
         }
 
-        // 监听并渲染学生列表
-        firebase.database().ref('students').on('value', (snapshot) => {
-          const studentsObj = snapshot.val() || {};
-          const students = Object.entries(studentsObj).map(([id, data]) => ({ id, ...data }));
-          renderStudentList(students);
 
-          // 自动同步window.studentMap
-          const studentMap = {};
-          students.forEach(s => {
-            studentMap[s.name] = { ...s };
-          });
-          window.studentMap = studentMap;
-
-          // 自动为所有试课学员同步课程安排
-          firebase.database().ref('schedule').once('value').then(scheduleSnap => {
-            const scheduleObj = scheduleSnap.val() || {};
-            const scheduledTrialNames = Object.values(scheduleObj)
-              .filter(c => c.type === 'trial')
-              .map(c => c.studentName + (c.trialTime || ''));
-            students.forEach(student => {
-              if (student.type === 'trial' && student.trialTime) {
-                const key = student.name + student.trialTime;
-                if (!scheduledTrialNames.includes(key)) {
-                  // 自动添加试课课程
-                  const trialDate = new Date(student.trialTime);
-                  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-                  const day = dayNames[trialDate.getDay()];
-                  const time = trialDate.getHours().toString().padStart(2, '0') + ':' + trialDate.getMinutes().toString().padStart(2, '0');
-                  const newCourse = {
-                    studentName: student.name,
-                    subject: student.subject,
-                    day: day,
-                    time: time,
-                    duration: 60,
-                    type: 'trial',
-                    status: 'scheduled',
-                    trialTime: student.trialTime,
-                    phone: student.phone || ''
-                  };
-                  firebase.database().ref('schedule').push(newCourse);
-                }
-              }
-            });
-          });
-        });
-
-        // 监听课程安排数据
-        firebase.database().ref('schedule').on('value', (snapshot) => {
-          const scheduleObj = snapshot.val() || {};
-          scheduleData = Object.entries(scheduleObj).map(([id, data]) => ({ id, ...data }));
-          generateScheduleTable();
-          updateDashboardStats();
-        });
-
-        // 监听已完成课程数据
-        firebase.database().ref('completed').on('value', (snapshot) => {
-          const completedObj = snapshot.val() || {};
-          completedCourses = Object.entries(completedObj).map(([id, data]) => ({ id, ...data }));
-          updateCompletedCoursesList();
-          updateDashboardStats();
-        });
-
-        // 监听反馈数据
-        firebase.database().ref('feedback').on('value', (snapshot) => {
-          const feedbackObj = snapshot.val() || {};
-          feedbackData = Object.entries(feedbackObj).map(([id, data]) => ({ id, ...data }));
-          renderFeedbackList();
-          updateDashboardStats();
-        });
 
         // 替换原有 addNewStudent 逻辑
         function addNewStudent(event) {
@@ -2234,57 +2511,159 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
           showNotification(`学生 ${studentData.name} 添加成功！`, 'success');
         }
 
-        document.getElementById('auth-form').onsubmit = async function(e) {
-          e.preventDefault();
-          console.log('表单提交事件触发');
-          authError.style.display = 'none';
-          const phone = document.getElementById('auth-phone').value.trim();
-          const password = document.getElementById('auth-password').value;
-          console.log('输入手机号:', phone, '输入密码:', password);
-          if (!/^\d{11}$/.test(phone)) {
-            authError.textContent = '请输入11位手机号';
-            authError.style.display = 'block';
-            console.log('手机号格式错误');
-            return;
-          }
-          try {
-            if (isLogin) {
-              // 登录：查找手机号，校验密码
-              const snap = await firebase.database().ref('users/' + phone).once('value');
-              const user = snap.val();
-              console.log('查到的用户：', user);
-              if (!user) throw new Error('用户不存在');
-              if (user.password !== password) throw new Error('密码错误');
-              // 登录成功，记录状态
-              localStorage.setItem('loginPhone', phone);
-              console.log('登录成功，进入主页面');
-              showMainContent(phone);
-            } else {
-              // 注册：手机号唯一
-              const snap = await firebase.database().ref('users/' + phone).once('value');
-              if (snap.exists()) throw new Error('手机号已注册');
-              await firebase.database().ref('users/' + phone).set({
+        // 登录/注册相关变量
+        let isLogin = true;
+        let authTitle, authSubmit, authToggleText, authToggleLink, authError;
+
+        // 初始化登录表单
+        function initializeAuthForm() {
+            authTitle = document.getElementById('auth-title');
+            authSubmit = document.getElementById('auth-submit');
+            authToggleText = document.getElementById('auth-toggle-text');
+            authToggleLink = document.getElementById('auth-toggle-link');
+            authError = document.getElementById('auth-error');
+            
+            // 绑定表单提交事件
+            const authForm = document.getElementById('auth-form');
+            if (authForm) {
+                authForm.onsubmit = handleAuthSubmit;
+            }
+            
+            // 绑定切换登录/注册事件
+            if (authToggleLink) {
+                authToggleLink.onclick = toggleAuthMode;
+            }
+        }
+
+        // 处理登录/注册提交
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            console.log('表单提交事件触发');
+            
+            if (!authError) return;
+            authError.style.display = 'none';
+            
+            const phone = document.getElementById('auth-phone').value.trim();
+            const password = document.getElementById('auth-password').value;
+            
+            console.log('输入手机号:', phone, '输入密码:', password);
+            
+            if (!/^\d{11}$/.test(phone)) {
+                showAuthError('请输入11位手机号');
+                return;
+            }
+            
+            if (!password || password.length < 6) {
+                showAuthError('密码至少6位');
+                return;
+            }
+            
+            try {
+                // 显示加载状态
+                const submitBtn = document.getElementById('auth-submit');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = isLogin ? '登录中...' : '注册中...';
+                submitBtn.disabled = true;
+                
+                if (isLogin) {
+                    // 登录逻辑
+                    await handleLogin(phone, password);
+                } else {
+                    // 注册逻辑
+                    await handleRegister(phone, password);
+                }
+                
+                // 恢复按钮状态
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+            } catch (err) {
+                console.error('登录/注册出错：', err);
+                showAuthError(err.message);
+                
+                // 恢复按钮状态
+                const submitBtn = document.getElementById('auth-submit');
+                submitBtn.textContent = isLogin ? '登录' : '注册';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // 处理登录
+        async function handleLogin(phone, password) {
+            const snap = await firebase.database().ref('users/' + phone).once('value');
+            const user = snap.val();
+            console.log('查到的用户：', user);
+            
+            if (!user) {
+                throw new Error('用户不存在，请先注册');
+            }
+            
+            if (user.password !== password) {
+                throw new Error('密码错误');
+            }
+            
+            // 登录成功
+            localStorage.setItem('loginPhone', phone);
+            console.log('登录成功，进入主页面');
+            showMainContent(phone);
+            showNotification('登录成功！', 'success');
+        }
+
+        // 处理注册
+        async function handleRegister(phone, password) {
+            const snap = await firebase.database().ref('users/' + phone).once('value');
+            if (snap.exists()) {
+                throw new Error('手机号已注册，请直接登录');
+            }
+            
+            await firebase.database().ref('users/' + phone).set({
                 phone,
                 password,
                 createdAt: new Date().toISOString()
-              });
-              localStorage.setItem('loginPhone', phone);
-              console.log('注册成功，进入主页面');
-              showMainContent(phone);
-            }
-          } catch (err) {
-            console.error('登录/注册出错：', err);
-            authError.textContent = err.message;
-            authError.style.display = 'block';
-          }
-        };
+            });
+            
+            // 注册成功
+            localStorage.setItem('loginPhone', phone);
+            console.log('注册成功，进入主页面');
+            showMainContent(phone);
+            showNotification('注册成功！', 'success');
+        }
 
-        let isLogin = true;
-        const authTitle = document.getElementById('auth-title');
-        const authSubmit = document.getElementById('auth-submit');
-        const authToggleText = document.getElementById('auth-toggle-text');
-        const authToggleLink = document.getElementById('auth-toggle-link');
-        const authError = document.getElementById('auth-error');
+        // 显示认证错误
+        function showAuthError(message) {
+            if (authError) {
+                authError.textContent = message;
+                authError.style.display = 'block';
+                authError.classList.remove('hidden');
+            }
+        }
+
+        // 切换登录/注册模式
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isLogin = !isLogin;
+            
+            if (isLogin) {
+                authTitle.textContent = '登录';
+                authSubmit.textContent = '登录';
+                authToggleText.textContent = '没有账号？';
+                authToggleLink.textContent = '注册';
+            } else {
+                authTitle.textContent = '注册';
+                authSubmit.textContent = '注册';
+                authToggleText.textContent = '已有账号？';
+                authToggleLink.textContent = '登录';
+            }
+            
+            // 清空错误信息
+            if (authError) {
+                authError.style.display = 'none';
+            }
+            
+            // 清空表单
+            document.getElementById('auth-phone').value = '';
+            document.getElementById('auth-password').value = '';
+        }
 
         // 在末尾添加详情弹窗函数
         function showCourseStudentDetail(course) {
@@ -2327,8 +2706,8 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
         }
 
         // 在末尾添加标记完成确认和写入已完成课程的函数
-        function completeCourseConfirm(courseId) {
-            const course = scheduleData.find(c => c.id === courseId);
+        function completeCourseConfirm(firebaseKey) {
+            const course = scheduleData.find(c => c.firebaseKey === firebaseKey);
             if (!course) return;
             if (confirm(`是否完成课程？\n\n学员：${course.studentName}\n科目：${course.subject}\n时间：${getDayName(course.day)} ${course.time}`)) {
                 // 计算薪资
@@ -2363,11 +2742,603 @@ ${trialTime ? `（${trialTime}）` : '（上课时间）'}我们一起进行试�
                     phone: course.phone || (window.studentMap && window.studentMap[course.studentName] ? window.studentMap[course.studentName].phone : '')
                 };
                 firebase.database().ref('completed').push(completedCourse);
-                // 从schedule中删除
-                firebase.database().ref('schedule/' + courseId).remove();
+                // 用firebaseKey从schedule中删除
+                firebase.database().ref('schedule/' + firebaseKey).remove();
                 showNotification('课程已标记为完成！', 'success');
             }
         }
+
+        // 处理图片上传
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('student-image-preview');
+                    const placeholder = document.getElementById('upload-placeholder');
+                    
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 在末尾添加删除已完成课程的函数
+        function deleteCompletedCourse(firebaseKey) {
+            if (confirm('确定要删除这条已完成课程吗？')) {
+                try {
+                    // 确保使用正确的firebaseKey删除
+                    firebase.database().ref('completed/' + firebaseKey).remove()
+                        .then(() => {
+                            showNotification('已完成课程已删除', 'success');
+                            // 重新加载已完成课程列表
+                            updateCompletedCoursesList();
+                        })
+                        .catch((error) => {
+                            console.error('删除失败:', error);
+                            showNotification('删除失败，请重试', 'error');
+                        });
+                } catch (error) {
+                    console.error('删除函数错误:', error);
+                    showNotification('删除失败，请重试', 'error');
+                }
+            }
+        }
+
+        // 数据同步和错误处理机制
+        function initializeDataSync() {
+            console.log('初始化数据同步...');
+            
+            // 监听学生数据变化
+            firebase.database().ref('students').on('value', (snapshot) => {
+                try {
+                    const studentsObj = snapshot.val() || {};
+                    console.log('从Firebase读取到的学生数据:', studentsObj);
+                    
+                    studentsData = Object.entries(studentsObj).map(([firebaseKey, data]) => ({ firebaseKey, ...data }));
+                    console.log('处理后的学生数据:', studentsData);
+                    
+                    // 渲染学生列表
+                    renderStudentList(studentsData);
+                    
+                    // 自动同步window.studentMap
+                    const studentMap = {};
+                    studentsData.forEach(s => {
+                        studentMap[s.name] = { ...s };
+                    });
+                    window.studentMap = studentMap;
+                    
+                    console.log('学生数据同步完成，studentMap:', window.studentMap);
+                    
+                    // 手动触发仪表板统计更新
+                    setTimeout(() => {
+                        console.log('手动触发仪表板统计更新');
+                        updateDashboardStats();
+                    }, 200);
+                    
+                    // 自动为所有试课学员同步课程安排
+                    firebase.database().ref('schedule').once('value').then(scheduleSnap => {
+                        const scheduleObj = scheduleSnap.val() || {};
+                        const scheduledTrialNames = Object.values(scheduleObj)
+                            .filter(c => c.type === 'trial')
+                            .map(c => c.studentName + (c.trialTime || ''));
+                        
+                        studentsData.forEach(student => {
+                            if (student.type === 'trial' && student.trialTime) {
+                                const key = student.name + student.trialTime;
+                                if (!scheduledTrialNames.includes(key)) {
+                                    // 自动添加试课课程
+                                    const trialDate = new Date(student.trialTime);
+                                    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                                    const day = dayNames[trialDate.getDay()];
+                                    const time = trialDate.getHours().toString().padStart(2, '0') + ':' + trialDate.getMinutes().toString().padStart(2, '0');
+                                    const newCourse = {
+                                        studentName: student.name,
+                                        subject: student.subject,
+                                        day: day,
+                                        time: time,
+                                        duration: 60,
+                                        type: 'trial',
+                                        status: 'scheduled',
+                                        trialTime: student.trialTime,
+                                        phone: student.phone || ''
+                                    };
+                                    firebase.database().ref('schedule').push(newCourse);
+                                }
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error in students data sync:', error);
+                    showNotification('学生数据同步出错', 'error');
+                }
+            });
+
+            // 监听课程安排数据变化
+            firebase.database().ref('schedule').on('value', (snapshot) => {
+                try {
+                    const scheduleObj = snapshot.val() || {};
+                    scheduleData = Object.entries(scheduleObj).map(([firebaseKey, data]) => ({ firebaseKey, ...data }));
+                    console.log('[schedule监听] 当前scheduleData:', scheduleData);
+                    generateScheduleTable();
+                    updateDashboardStats();
+                } catch (error) {
+                    console.error('[schedule监听] Error:', error);
+                    showNotification('课程安排数据同步出错', 'error');
+                }
+            });
+
+            // 监听已完成课程数据变化
+            firebase.database().ref('completed').on('value', (snapshot) => {
+                try {
+                    const completedObj = snapshot.val() || {};
+                    completedCourses = Object.entries(completedObj).map(([firebaseKey, data]) => ({ firebaseKey, ...data }));
+                    updateCompletedCoursesList(completedCourses);
+                    updateDashboardStats();
+                } catch (error) {
+                    console.error('Error in completed courses data sync:', error);
+                    showNotification('已完成课程数据同步出错', 'error');
+                }
+            });
+
+            // 监听反馈数据变化
+            firebase.database().ref('feedback').on('value', (snapshot) => {
+                try {
+                    const feedbackObj = snapshot.val() || {};
+                    feedbackData = Object.entries(feedbackObj).map(([firebaseKey, data]) => ({ firebaseKey, ...data }));
+                    renderFeedbackList();
+                    updateDashboardStats();
+                } catch (error) {
+                    console.error('Error in feedback data sync:', error);
+                    showNotification('反馈数据同步出错', 'error');
+                }
+            });
+        }
+
+        // 渲染学生列表
+        function renderStudentList(students) {
+            try {
+                const formalContainer = document.getElementById('formal-students');
+                const trialContainer = document.getElementById('trial-students');
+                if (!formalContainer || !trialContainer) {
+                    console.log('学生容器未找到');
+                    return;
+                }
+                
+                console.log('开始渲染学生列表，学生数量:', students.length);
+                console.log('所有学生数据:', students);
+                
+                formalContainer.innerHTML = '';
+                trialContainer.innerHTML = '';
+                
+                students.forEach((student, index) => {
+                    console.log(`渲染第${index + 1}个学生:`, student);
+                    
+                    // 检查学生数据的完整性
+                    if (!student.name) {
+                        console.error('学生数据缺少name字段:', student);
+                        return;
+                    }
+                    
+                    const card = createStudentCard(student);
+                    if (student.type === 'trial') {
+                        trialContainer.appendChild(card);
+                        console.log(`已将 ${student.name} 添加到试课学员容器`);
+                    } else {
+                        formalContainer.appendChild(card);
+                        console.log(`已将 ${student.name} 添加到正式学员容器`);
+                    }
+                });
+                
+                console.log('学生列表渲染完成');
+                console.log('正式学员容器中的卡片数量:', formalContainer.querySelectorAll('.student-card').length);
+                console.log('试课学员容器中的卡片数量:', trialContainer.querySelectorAll('.student-card').length);
+                
+                // 延迟更新仪表板统计，确保DOM已更新
+                setTimeout(() => {
+                    updateDashboardStats();
+                    updateScheduleStudentOptions();
+                }, 100);
+            } catch (error) {
+                console.error('Error in renderStudentList:', error);
+                showNotification('渲染学生列表出错', 'error');
+            }
+        }
+
+        // 渲染反馈列表
+        function renderFeedbackList() {
+            try {
+                const feedbackList = document.getElementById('feedback-list');
+                if (!feedbackList) return;
+                
+                feedbackList.innerHTML = '';
+                
+                feedbackData.forEach(feedback => {
+                    const card = document.createElement('div');
+                    card.className = 'card mb-4';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${feedback.studentName}</h3>
+                                <p class="text-sm text-gray-600">${feedback.date}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="viewFeedbackDetail('${feedback.firebaseKey}')" class="btn-secondary text-sm">查看详情</button>
+                                <button onclick="deleteFeedback('${feedback.firebaseKey}')" class="btn-secondary text-sm text-red-600">删除</button>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-700">
+                            <p><strong>学习内容：</strong>${feedback.learningContent || ''}</p>
+                            <p><strong>反馈内容：</strong>${feedback.content || ''}</p>
+                        </div>
+                    `;
+                    feedbackList.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error in renderFeedbackList:', error);
+                showNotification('渲染反馈列表出错', 'error');
+            }
+        }
+
+        // 删除反馈
+        function deleteFeedback(firebaseKey) {
+            if (confirm('确定要删除这条反馈吗？')) {
+                firebase.database().ref('feedback/' + firebaseKey).remove();
+                showNotification('反馈已删除', 'success');
+            }
+        }
+
+        // 查看反馈详情
+        function viewFeedbackDetail(firebaseKey) {
+            const feedback = feedbackData.find(f => f.firebaseKey === firebaseKey);
+            if (!feedback) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 overflow-y-auto';
+            modal.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75" onclick="closeModal()"></div>
+                    </div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">反馈详情</h3>
+                                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <span class="font-medium text-gray-700">学员：</span>
+                                    <span class="text-gray-900">${feedback.studentName}</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">日期：</span>
+                                    <span class="text-gray-900">${feedback.date}</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">学习内容：</span>
+                                    <p class="text-gray-900 mt-1">${feedback.learningContent || ''}</p>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">反馈内容：</span>
+                                    <p class="text-gray-900 mt-1 whitespace-pre-line">${feedback.content || ''}</p>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">学习进度：</span>
+                                    <p class="text-gray-900 mt-1 whitespace-pre-line">${feedback.progress || ''}</p>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">下一步计划：</span>
+                                    <p class="text-gray-900 mt-1 whitespace-pre-line">${feedback.nextSteps || ''}</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 mt-6">
+                                <button onclick="closeModal()" class="btn-secondary flex-1">关闭</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        // 显示通知消息
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                warning: 'bg-yellow-500 text-white',
+                info: 'bg-blue-500 text-white'
+            };
+            
+            notification.className += ` ${colors[type] || colors.info}`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}" class="w-5 h-5"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            lucide.createIcons();
+            
+            // 显示动画
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 显示标签页内容
+        function showTab(tabName) {
+            // 隐藏所有内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // 移除所有导航按钮的激活状态
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'bg-opacity-20');
+            });
+            
+            // 显示选中的内容
+            const selectedContent = document.getElementById(tabName + '-content');
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            }
+            
+            // 激活对应的导航按钮
+            const selectedBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('bg-white', 'bg-opacity-20');
+            }
+        }
+
+        // 绑定导航按钮事件
+        function bindNavigationEvents() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    showTab(tabName);
+                });
+            });
+        }
+
+        // 绑定退出登录事件
+        function bindLogoutEvents() {
+            const navbarLogoutBtn = document.getElementById('navbar-logout-btn');
+            if (navbarLogoutBtn) {
+                navbarLogoutBtn.onclick = logout;
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('loginPhone');
+            document.getElementById('auth-container').style.display = 'flex';
+            document.getElementById('navbar-user-bar').style.display = 'none';
+            document.getElementById('main-navbar').style.display = 'none';
+            document.body.classList.add('auth-locked');
+        }
+
+        // 显示主界面内容
+        function showMainContent(phone) {
+            console.log('显示主界面，用户手机号:', phone);
+            
+            // 隐藏登录界面
+            document.getElementById('auth-container').style.display = 'none';
+            document.body.classList.remove('auth-locked');
+            
+            // 显示导航栏和用户栏
+            document.getElementById('navbar-user-bar').style.display = 'flex';
+            document.getElementById('main-navbar').style.display = 'flex';
+            
+            // 设置用户信息
+            const userPhoneSpan = document.getElementById('user-phone');
+            if (userPhoneSpan) {
+                userPhoneSpan.textContent = phone;
+            }
+            
+            // 绑定退出登录事件
+            bindLogoutEvents();
+            
+            // 默认显示仪表盘
+            showTab('dashboard');
+            
+            // 初始化数据同步
+            initializeDataSync();
+            
+            // 初始化数据监听
+            initializeDataListeners(phone);
+        }
+
+        // 初始化数据监听器
+        function initializeDataListeners(phone) {
+            console.log('初始化数据监听器，用户:', phone);
+            
+            // 监听学生数据
+            firebase.database().ref('students').on('value', function(snapshot) {
+                const students = [];
+                snapshot.forEach(function(childSnapshot) {
+                    const student = childSnapshot.val();
+                    student.firebaseKey = childSnapshot.key;
+                    students.push(student);
+                });
+                window.students = students;
+                renderStudentList();
+            });
+            
+            // 监听课程数据
+            firebase.database().ref('courses').on('value', function(snapshot) {
+                const courses = [];
+                snapshot.forEach(function(childSnapshot) {
+                    const course = childSnapshot.val();
+                    course.firebaseKey = childSnapshot.key;
+                    courses.push(course);
+                });
+                window.courses = courses;
+                renderCourseList();
+            });
+            
+            // 监听反馈数据
+            firebase.database().ref('feedback').on('value', function(snapshot) {
+                const feedback = [];
+                snapshot.forEach(function(childSnapshot) {
+                    const fb = childSnapshot.val();
+                    fb.firebaseKey = childSnapshot.key;
+                    feedback.push(fb);
+                });
+                window.feedbackData = feedback;
+                renderFeedbackList();
+            });
+        }
+
+        // 渲染学生列表
+        function renderStudentList() {
+            try {
+                const students = window.students || [];
+                const trialContainer = document.getElementById('trial-students');
+                const formalContainer = document.getElementById('formal-students');
+                
+                if (!trialContainer || !formalContainer) {
+                    console.log('学生容器未找到，跳过渲染');
+                    return;
+                }
+                
+                trialContainer.innerHTML = '';
+                formalContainer.innerHTML = '';
+                
+                students.forEach(student => {
+                    const card = createStudentCard(student);
+                    if (student.type === 'trial') {
+                        trialContainer.appendChild(card);
+                    } else {
+                        formalContainer.appendChild(card);
+                    }
+                });
+            } catch (error) {
+                console.error('渲染学生列表出错:', error);
+            }
+        }
+
+        // 渲染课程列表
+        function renderCourseList() {
+            try {
+                const courses = window.courses || [];
+                const courseList = document.getElementById('course-list');
+                
+                if (!courseList) {
+                    console.log('课程列表容器未找到，跳过渲染');
+                    return;
+                }
+                
+                courseList.innerHTML = '';
+                
+                courses.forEach(course => {
+                    const card = createCourseCard(course);
+                    courseList.appendChild(card);
+                });
+            } catch (error) {
+                console.error('渲染课程列表出错:', error);
+            }
+        }
+
+        // 渲染反馈列表
+        function renderFeedbackList() {
+            try {
+                const feedbackData = window.feedbackData || [];
+                const feedbackList = document.getElementById('feedback-list');
+                
+                if (!feedbackList) {
+                    console.log('反馈列表容器未找到，跳过渲染');
+                    return;
+                }
+                
+                feedbackList.innerHTML = '';
+                
+                feedbackData.forEach(feedback => {
+                    const card = document.createElement('div');
+                    card.className = 'card mb-4';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${feedback.studentName}</h3>
+                                <p class="text-sm text-gray-600">${feedback.date}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="viewFeedbackDetail('${feedback.firebaseKey}')" class="btn-secondary text-sm">查看详情</button>
+                                <button onclick="deleteFeedback('${feedback.firebaseKey}')" class="btn-secondary text-sm text-red-600">删除</button>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-700">
+                            <p><strong>学习内容：</strong>${feedback.learningContent || ''}</p>
+                            <p><strong>反馈内容：</strong>${feedback.content || ''}</p>
+                        </div>
+                    `;
+                    feedbackList.appendChild(card);
+                });
+            } catch (error) {
+                console.error('渲染反馈列表出错:', error);
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面开始初始化...');
+
+            try {
+                // 初始化登录表单
+                initializeAuthForm();
+                console.log('登录表单初始化完成');
+
+                // 绑定导航事件
+                bindNavigationEvents();
+                console.log('导航事件绑定完成');
+
+                // 初始化图标
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                    console.log('图标初始化完成');
+                }
+
+                // 检查登录状态
+                const phone = localStorage.getItem('loginPhone');
+                if (phone) {
+                    console.log('检测到登录状态，显示主界面');
+                    showMainContent(phone);
+                    // 初始化数据同步
+                    initializeDataSync();
+                } else {
+                    console.log('未检测到登录状态，显示登录界面');
+                    document.getElementById('auth-container').style.display = 'flex';
+                    document.getElementById('navbar-user-bar').style.display = 'none';
+                    document.getElementById('main-navbar').style.display = 'none';
+                    document.body.classList.add('auth-locked');
+                }
+
+                console.log('页面初始化完成');
+            } catch (error) {
+                console.error('页面初始化出错:', error);
+            }
+        });
     </script>
 </body>
-</html> 
+</html>

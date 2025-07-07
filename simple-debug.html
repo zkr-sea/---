@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单调试</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 400px; margin: 0 auto; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>简单调试</h1>
+        <input type="tel" id="phone" placeholder="手机号" value="13800138000">
+        <input type="password" id="password" placeholder="密码" value="123456">
+        <button onclick="testLogin()">测试登录</button>
+        <button onclick="testRegister()">测试注册</button>
+        <button onclick="clearLog()">清空日志</button>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // Firebase配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxGgOeRzcUn28qJa1KJnht8o3QjvW7qQk",
+            authDomain: "coach-system-8f0d7.firebaseapp.com",
+            databaseURL: "https://coach-system-8f0d7-default-rtdb.firebaseio.com",
+            projectId: "coach-system-8f0d7",
+            storageBucket: "coach-system-8f0d7.appspot.com",
+            messagingSenderId: "1062284200459",
+            appId: "1:1062284200459:web:8f0d7c8c8c8c8c8c8c8c8c"
+        };
+
+        // 初始化Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testLogin() {
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            
+            log(`开始登录测试: ${phone}`);
+            
+            try {
+                const snap = await firebase.database().ref('users/' + phone).once('value');
+                const user = snap.val();
+                log(`查询结果: ${JSON.stringify(user)}`);
+                
+                if (!user) {
+                    log('用户不存在');
+                    return;
+                }
+                
+                if (user.password === password) {
+                    log('登录成功！');
+                    localStorage.setItem('loginPhone', phone);
+                    log('登录状态已保存');
+                } else {
+                    log('密码错误');
+                }
+            } catch (error) {
+                log(`错误: ${error.message}`);
+            }
+        }
+
+        async function testRegister() {
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            
+            log(`开始注册测试: ${phone}`);
+            
+            try {
+                const snap = await firebase.database().ref('users/' + phone).once('value');
+                if (snap.exists()) {
+                    log('用户已存在');
+                    return;
+                }
+                
+                await firebase.database().ref('users/' + phone).set({
+                    phone,
+                    password,
+                    createdAt: new Date().toISOString()
+                });
+                
+                log('注册成功！');
+                localStorage.setItem('loginPhone', phone);
+                log('登录状态已保存');
+            } catch (error) {
+                log(`错误: ${error.message}`);
+            }
+        }
+
+        log('页面加载完成');
+    </script>
+</body>
+</html> 
